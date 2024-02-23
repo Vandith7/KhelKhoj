@@ -1,0 +1,203 @@
+.userProfile {
+    height: 46px;
+    width: 46px;
+    border-radius: 50px;
+}
+
+.header{
+    width: 100%;
+}
+.links{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10%;
+}
+
+.ulLink{
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.searchBox {
+    width: 64%;
+    height: 22%;
+    padding: 14px;
+    margin-right: 10%;
+    border: 2px solid #9D7947;
+    border-radius: 10px;
+    outline: none;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 18px;
+}
+
+.searchContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 78%;
+}
+
+.logoutButton{
+    transition: all .5s ease;
+    font-size: 20px;
+    color: #333;
+    margin-left: 26px; 
+    text-decoration: none;
+}
+
+.logoutButton:hover{
+    cursor: pointer;
+    color: #ff0000;
+}
+
+.main {
+    height: 638px;
+    width: 100%;
+    display: flex;
+    overflow: hidden;
+}
+
+.leftBar {
+    display: flex;
+    font-family: 'Poppins', sans-serif;
+    flex-direction: column;
+    width: 20%;
+    height: 100%;
+    border-right: solid #9D7947 1px;
+    background-color: #FCFAF8;
+    padding: 2%;
+    overflow-y: auto; 
+}
+
+.leftBar h2 {
+    color: #9D7947;
+    font-weight: 500;
+    margin-top: 6%;
+}
+
+.leftCardContainer{
+    list-style-type: none;
+    flex-direction: column;
+    margin: 0;
+    align-items: center;
+    padding: 0;
+    justify-content: center;
+    display: flex;
+    margin-right: 0px;
+    padding-bottom: 20%;
+}
+
+.cardsLeft {
+    
+    border-radius: 10px;
+    margin-top: 5%;
+    height: 200px;
+    width: 280px;
+    padding: 3%;
+    box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 8px;
+}
+
+.cardsLeft:hover{
+    cursor: pointer;
+}
+
+.venueLeft{
+    margin-left: 3%;
+    color: #9D7947;
+}
+
+.activityLeft{
+    margin-left: 3%;
+}
+
+.dayLeft{
+    margin-left: 3%;
+}
+
+.slotLeft{
+    margin-left: 3%;
+}
+
+.rightBar {
+    height: 100%;
+    width: 80%;
+    overflow-y: auto; 
+}
+
+.greetContainer{
+    min-height: 16%;
+}
+
+.greetUser{
+    margin-top: 4%;
+    margin-left: 3%;
+    font-family: 'Poppins',sans-serif;
+}
+
+.venueContainer{
+    display: grid;
+    height: 100vh;
+    padding: 2%;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 10px;
+}
+
+.venueCard {
+    min-width: 80%;
+    cursor: pointer;
+    font-family: 'Poppins',sans-serif;
+    height: 300px;
+    margin: 3%;
+    border-radius: 10px;
+    box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 8px;
+  }
+
+
+  .venuePic{
+    height: 60%;
+    background-position: center;
+    background-size: cover ;
+    background-repeat: no-repeat;
+    border-radius: 10px;
+  }
+
+  .venueName{
+    color:#F19006;
+    margin-top: 8px;
+    font-weight: 500;
+    margin-left: 3%;
+  }
+
+  .picLocation{
+    margin-top: -12px;
+    margin-left: 3%;
+  }
+  .venueRating{
+    margin-top: -10px;
+    margin-left:3%;
+  }
+
+  .tooltip {
+    position: absolute;
+    background-color: #333;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    z-index: 1;
+    top: calc(100% + 5px); 
+    left: calc(50% + 10px); 
+    transform: translateX(-50%);
+    display: none;
+  }
+  
+  .logoutButton {
+    position: relative; 
+  }
+  
+  .logoutButton:hover .tooltip {
+    display: block; 
+  }
+  
