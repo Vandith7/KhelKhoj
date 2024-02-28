@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef } from "react";
 import "../Styles/Welcome.css";
 import logo from "../assets/KhelKhojLogo.png";
 import boy from "../assets/Boy.webp";
@@ -8,39 +8,16 @@ import {
   faFutbol,
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
-import { Link, useHistory } from "react-router-dom";
-import WelcomeUser from "./WelcomeUser";
-import axios from "axios";
+import { Link } from "react-router-dom";
 
 function Welcome() {
   const infoRef = useRef(null);
-  const [auth, setAuth] = useState(false);
-  //   const [name, setName] = useState("");
-  const navigate = useHistory();
-  axios.defaults.withCredentials = true;
-  useEffect(() => {
-    axios
-      .get("http://localhost:3001/user/")
-      .then((res) => {
-        if (res.data.status === "Success") {
-          setAuth(true);
-          //   setName(res.data.name);
-          navigate.push("/welcomeUser");
-        } else {
-          setAuth(false);
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-      });
-  });
+
   const scrollToInfo = () => {
     infoRef.current.scrollIntoView({ behavior: "smooth" });
   };
 
-  return auth ? (
-    <WelcomeUser />
-  ) : (
+  return (
     <div className="container">
       <div className="header">
         <img className="logo" src={logo} alt="Khel-Khoj" />

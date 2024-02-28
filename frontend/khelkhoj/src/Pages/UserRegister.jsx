@@ -4,6 +4,8 @@ import logo from "../assets/KhelKhojLogo.png";
 import { Link, useHistory } from "react-router-dom";
 import axios from "axios";
 import FileImageUploader from "../Components/FileImageUploader";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 function UserRegister() {
   const [values, setValues] = useState({
@@ -16,10 +18,9 @@ function UserRegister() {
     profile_photo: null,
   });
 
-  console.log(values);
-
   const [passwordError, setPasswordError] = useState("");
   const [isPasswordBlurred, setIsPasswordBlurred] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [nameError, setNameError] = useState("");
   console.log(values);
@@ -91,6 +92,10 @@ function UserRegister() {
   const handleEmailChange = (e) => {
     setValues({ ...values, email: e.target.value });
     setEmailError(""); // Reset email error when email changes
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -183,30 +188,48 @@ function UserRegister() {
             <label htmlFor="pass" className="labels">
               Password :
             </label>
-            <input
-              onChange={(e) =>
-                setValues({ ...values, password: e.target.value })
-              }
-              onBlur={handlePasswordBlur}
-              type="password"
-              id="pass"
-              placeholder="Enter password"
-              required
-              className="inputField"
-            ></input>
+            <div className="passwordInputContainer">
+              <input
+                onChange={(e) =>
+                  setValues({ ...values, password: e.target.value })
+                }
+                onBlur={handlePasswordBlur}
+                type={showPassword ? "text" : "password"}
+                id="pass"
+                placeholder="Enter password"
+                required
+                className="inputFieldPass"
+              ></input>
+              <FontAwesomeIcon
+                style={{ marginBottom: "4px", marginLeft: "2%" }}
+                icon={showPassword ? faEyeSlash : faEye}
+                className="eyeIcon"
+                onClick={togglePasswordVisibility}
+              />
+            </div>
+
             <label htmlFor="conPass" className="labels">
               Confirm password :
             </label>
-            <input
-              onChange={(e) =>
-                setValues({ ...values, conPassword: e.target.value })
-              }
-              type="password"
-              id="conPass"
-              placeholder="Confirm Password"
-              required
-              className="inputField"
-            ></input>
+            <div className="passwordInputContainer">
+              <input
+                onChange={(e) =>
+                  setValues({ ...values, conPassword: e.target.value })
+                }
+                type={showPassword ? "text" : "password"}
+                id="conPass"
+                placeholder="Confirm Password"
+                required
+                className="inputFieldPass"
+              ></input>
+              <FontAwesomeIcon
+                style={{ marginBottom: "4px", marginLeft: "2%" }}
+                icon={showPassword ? faEyeSlash : faEye}
+                className="eyeIcon"
+                onClick={togglePasswordVisibility}
+              />
+            </div>
+
             <div className="errorContainer">
               {nameError && <p className="error">{nameError}</p>}
               {emailError && <p className="error">{emailError}</p>}

@@ -24,7 +24,7 @@ function FileImageUploader(props) {
       <input
         type="file"
         id="fileInput"
-        accept="image/png, image/jpeg, image/jpg"
+        accept="image/png, image/jpeg, image/jpg,image/webp"
         style={{ display: "none" }}
         onChange={handleFileChange}
       />

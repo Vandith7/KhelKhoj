@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 const Greeting = ({ name }) => {
-  const [greeting, setGreeting] = useState("");
+  const [displayedGreeting, setDisplayedGreeting] = useState("");
 
   useEffect(() => {
     const morningGreetings = [
@@ -73,10 +73,20 @@ const Greeting = ({ name }) => {
     const randomIndex = Math.floor(Math.random() * greetings.length);
     const randomGreeting = greetings[randomIndex];
 
-    setGreeting(randomGreeting);
+    let i = 0;
+    const typingInterval = setInterval(() => {
+      if (i <= randomGreeting.length) {
+        setDisplayedGreeting(randomGreeting.substring(0, i));
+        i++;
+      } else {
+        clearInterval(typingInterval);
+      }
+    }, 35); // Adjust typing speed as needed
+
+    return () => clearInterval(typingInterval);
   }, [name]);
 
-  return <h1 className="greetUser">{greeting}</h1>;
+  return <h1 className="greetUser">{displayedGreeting}</h1>;
 };
 
 export default Greeting;

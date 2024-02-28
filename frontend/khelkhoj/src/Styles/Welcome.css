@@ -68,8 +68,8 @@ body{
     transition: all .5s ease;
     height: 85%;
     width: 10%;
-    color:#FFF ;
-    background-color:#000 ;
+    color: #000;
+    background-color: #F19006;
     font-size: 18px;
     letter-spacing: 0.5px;
     font-weight: 500;
@@ -80,6 +80,11 @@ body{
     justify-content: center;
     align-items: center;
     font-family: 'Poppins',sans-serif;
+}
+
+.nextButton:hover{
+    color:#FFF ;
+    background-color:#000 ;
 }
 
 .info{
@@ -134,11 +139,6 @@ box-shadow: 0px 25px 80px rgba(0, 0, 0, 0.15);
     color: #000;
 }
 
-
-.nextButton:hover{
-    color: #000;
-    background-color: #CBB89E;
-}
 .Button:hover {
       color:#FCFAF8 ;
     background-color:#000 ;

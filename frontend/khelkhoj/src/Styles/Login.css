@@ -191,3 +191,50 @@ body{
     text-decoration: none;
     color: #000;
 }
+
+.passwordInputContainer {
+    position: relative;
+    display: flex;
+  }
+  
+  .eyeIcon {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    z-index: 1;
+  }
+
+  .inputFieldPass{
+    height: 20%;
+    padding: 14px; 
+    margin-bottom: 10px; 
+    border: 2px solid #CBB89E; 
+    border-radius: 10px; 
+    outline: none; 
+    font-family: 'Montserrat',sans-serif;
+    font-size: 18px;
+    width: calc(100% - 40px); 
+  padding-right: 40px; 
+  padding-left: 30px;
+  }
+
+  .inputFieldPass::placeholder {
+    color: #9D7947;
+    font-size: 18px;
+    opacity: 1; 
+  }
+
+.inputFieldPass:focus {
+    border-color: #000; 
+}
+.eyeIcon{
+    transition: all .5s ease;
+    height: 30%;
+    padding-bottom:4%;
+    /* margin-right: px; */
+}
+.eyeIcon:hover{
+color: #F19006;
+}

@@ -3,6 +3,7 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 const userRoutes = require('./routes/userRoutes');
+const clubRoutes = require('./routes/clubRoutes');
 
 const salt = 10;
 
@@ -16,6 +17,9 @@ app.use(cors({
 app.use(cookieParser());
 
 app.use('/user', userRoutes);
+app.use('/club', clubRoutes);
+
+
 
 app.listen(3001, () => {
     console.log("Server running on port 3001");

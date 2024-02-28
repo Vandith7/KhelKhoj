@@ -1,0 +1,118 @@
+.addGroundAndActivities{
+    height: 78%;
+    display: flex;
+    flex-direction: row;
+}
+
+.rightBar{
+    overflow: hidden;
+}
+
+
+
+.AddClubGround, .AddClubActivity {
+    margin-top: 2%;
+    flex-direction: column;
+    font-family: 'Poppins', sans-serif;
+    height: 100%;
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-y: auto; /* Keep auto-scrolling behavior for individual elements */
+}
+
+.linkStyle{
+
+        color: inherit;
+    
+}
+
+.addGround,.addActivity{
+    text-decoration: none;
+    height: 300px;
+    transition: ease all 0.5s;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 50%;
+    background-color: #F4EFE8;
+    color: #000;
+    border-radius: 20px;
+    box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 8px;
+}
+
+
+.addGround:hover,.addActivity:hover{
+    color:#FFF ;
+    background-color:#000 ;
+}
+
+
+
+
+.groundsClubContainer{
+    overflow-y: auto;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 50%;
+    font-family: 'Poppins',sans-serif;
+}
+
+
+
+.addGroundSmall{
+    height: 80px;
+    width: 80px;
+    text-decoration: none;
+    transition: ease all 0.5s;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #F4EFE8;
+    color: #000;
+    border-radius: 50px;
+    box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 8px;
+}
+
+.addGroundSmall:hover{
+    color:#FFF ;
+    background-color:#000 ;
+}
+
+.groundClubCard{
+    list-style:none;
+    text-wrap: wrap;
+    width: 420px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    margin: 3%;
+    border-radius: 10px;
+    box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 8px;
+    overflow: hidden; /* Ensure overflow is hidden to contain content */
+    display: flex; /* Use flex to align content */
+    flex-direction: column; /* Align content vertically */
+}
+
+ .groundClubPic{
+    height: auto;
+    width: 100%;
+    background-position: center;
+    object-position: center;
+    background-size: cover;
+    object-fit: cover;
+    background-repeat: no-repeat;
+    border-radius: 10px;
+}
+
+.groundClubCard h3,
+.groundClubCard p {
+    margin-left: 2%;
+    margin-bottom: 10px; 
+}

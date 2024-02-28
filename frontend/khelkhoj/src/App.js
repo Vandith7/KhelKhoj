@@ -6,7 +6,9 @@ import ClubLogin from './Pages/ClubLogin';
 import UserRegister from './Pages/UserRegister';
 import UserLogin from './Pages/UserLogin';
 import WelcomeUser from './Pages/WelcomeUser';
-import Activities from './Pages/Activities';
+import WelcomeClub from './Pages/WelcomeClub';
+import AddGround from './Pages/AddGround';
+import AddActivities from './Pages/AddActivities';
 
 function App() {
   return (
@@ -20,7 +22,9 @@ function App() {
         <Route path="/userRegister" component={UserRegister} />
         <Route path="/userLogin" component={UserLogin} />
         <Route path="/welcomeUser" component={WelcomeUser} />
-        <Route path="/activities" component={Activities} />
+        <Route path="/welcomeClub" component={WelcomeClub} />
+        <Route path="/addGround" component={AddGround} />
+        <Route path="/addActivity" component={AddActivities} />
       </Switch>
 
     </Router>

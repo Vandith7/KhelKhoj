@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../Styles/Login.css";
 import logo from "../assets/KhelKhojLogo.png";
 import { Link, useHistory } from "react-router-dom";
 import axios from "axios";
+import WelcomeUser from "./WelcomeUser";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 
 function UserLogin() {
   const [values, setValues] = useState({
@@ -11,8 +14,26 @@ function UserLogin() {
   });
   const [emailError, setEmailError] = useState("");
   const [passError, setPassError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useHistory();
   axios.defaults.withCredentials = true;
+  const [auth, setAuth] = useState(false);
+  axios.defaults.withCredentials = true;
+  useEffect(() => {
+    axios
+      .get("http://localhost:3001/user/")
+      .then((res) => {
+        if (res.data.status === "Success") {
+          setAuth(true);
+          navigate.push("/welcomeUser");
+        } else {
+          setAuth(false);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  });
   const handleSubmit = (event) => {
     event.preventDefault();
     axios
@@ -48,7 +69,13 @@ function UserLogin() {
     setEmailError(""); // Reset email error when email changes
   };
 
-  return (
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  return auth ? (
+    <WelcomeUser />
+  ) : (
     <div className="container">
       <div className="header">
         <img className="logo" src={logo} alt="Khel-Khoj" />
@@ -100,14 +127,23 @@ function UserLogin() {
             <label htmlFor="password" className="labels">
               Password :
             </label>
-            <input
-              onChange={handlePassChange}
-              type="password"
-              id="password"
-              placeholder="Enter password"
-              required
-              className="inputField"
-            ></input>
+
+            <div className="passwordInputContainer">
+              <input
+                onChange={handlePassChange}
+                type={showPassword ? "text" : "password"} // Toggle input type based on showPassword state
+                id="password"
+                placeholder="Enter password"
+                required
+                className="inputFieldPass"
+              />
+              <FontAwesomeIcon
+                style={{ marginBottom: "4px", marginLeft: "2%" }}
+                icon={showPassword ? faEyeSlash : faEye}
+                className="eyeIcon"
+                onClick={togglePasswordVisibility}
+              />
+            </div>
             <div className="errorContainer">
               {passError && <p className="error">{passError}</p>}
               {emailError && <p className="error">{emailError}</p>}
