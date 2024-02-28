@@ -213,6 +213,50 @@ router.get('/activities', (req, res) => {
     });
 });
 
+router.get('/grounds/:groundId', (req, res) => {
+    const groundId = req.params.groundId;
+
+    const sql = `SELECT 
+    g.ground_id, 
+    g.type, 
+    g.description,
+    TIME_FORMAT(g.start_time, '%H:%i') AS start_time, 
+    TIME_FORMAT(g.end_time, '%H:%i') AS end_time, 
+    g.price, 
+    c.name AS club_name,
+    c.address,
+    g.photo1,
+    g.photo2,
+    g.photo3,
+    g.photo4
+FROM grounds AS g
+INNER JOIN clubs AS c ON g.club_id = c.club_id
+    WHERE g.ground_id = ?`;
+
+    db.query(sql, [groundId], (err, results) => {
+        if (err) {
+            console.error("Error fetching ground data:", err);
+            return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ status: "Error", error: "Ground not found" });
+        }
+
+        const ground = results[0];
+
+        // Convert photo paths to strings
+        const groundWithPhotos = {
+            ...ground,
+            photo1: ground.photo1 ? ground.photo1.toString() : null,
+            photo2: ground.photo2 ? ground.photo2.toString() : null,
+            photo3: ground.photo3 ? ground.photo3.toString() : null,
+            photo4: ground.photo4 ? ground.photo4.toString() : null
+        };
+
+        res.json({ status: "Success", ground: groundWithPhotos });
+    });
+});
 
 
 module.exports = router;

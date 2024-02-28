@@ -9,6 +9,8 @@ import WelcomeUser from './Pages/WelcomeUser';
 import WelcomeClub from './Pages/WelcomeClub';
 import AddGround from './Pages/AddGround';
 import AddActivities from './Pages/AddActivities';
+import GroundDetails from './Pages/GroundDetails';
+import ActivityDetails from './Pages/ActivityDetails';
 
 function App() {
   return (
@@ -25,6 +27,8 @@ function App() {
         <Route path="/welcomeClub" component={WelcomeClub} />
         <Route path="/addGround" component={AddGround} />
         <Route path="/addActivity" component={AddActivities} />
+        <Route path="/groundDetails/:groundId" component={GroundDetails} />
+        <Route path="/activityDetails/:activityId" component={ActivityDetails} />
       </Switch>
 
     </Router>

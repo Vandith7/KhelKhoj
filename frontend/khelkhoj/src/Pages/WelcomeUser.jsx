@@ -322,7 +322,11 @@ function WelcomeUser() {
                 </div>
               ) : (
                 filterResults(grounds).map((ground) => (
-                  <div key={ground.ground_id} className="venueCard">
+                  <Link
+                    to={`/groundDetails/${ground.ground_id}`}
+                    key={ground.ground_id}
+                    className="venueCard"
+                  >
                     {ground.photo1 ? (
                       <img
                         className="venuePic"
@@ -384,7 +388,7 @@ function WelcomeUser() {
                       />
                       Price: {ground.price}
                     </p>
-                  </div>
+                  </Link>
                 ))
               )}
             </div>
@@ -405,7 +409,11 @@ function WelcomeUser() {
                 </div>
               ) : (
                 filterResults(activities).map((activity) => (
-                  <div key={activity.activity_id} className="activityCard">
+                  <Link
+                    to={`/activityDetails/${activity.activity_id}`}
+                    key={activity.activity_id}
+                    className="activityCard"
+                  >
                     {activity.photo1 ? (
                       <img
                         className="venuePic"
@@ -480,7 +488,7 @@ function WelcomeUser() {
                       />
                       Price: {Math.floor(activity.price)}/person
                     </p>
-                  </div>
+                  </Link>
                 ))
               )}
             </div>

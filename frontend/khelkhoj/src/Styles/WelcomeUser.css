@@ -182,7 +182,8 @@
 }
 
 .venueCard {
-
+    text-decoration: none;
+    color: #333;
     cursor: pointer;
     font-family: 'Poppins',sans-serif;
     height: 400px;
@@ -201,7 +202,8 @@
 }
 
 .activityCard {
-
+    text-decoration: none;
+    color: #333;
     cursor: pointer;
     font-family: 'Poppins',sans-serif;
     height: 500px;
@@ -210,13 +212,13 @@
     box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 8px;
   }
   .activityCard p{
+    color: #333;
     margin-left: 2%;
   }
-  .emptyResults{
 
+  .emptyResults{
    grid-column: 1 / -1; /* This spans the full width of the grid */
     grid-row: 1 / -1; /* This spans the full height of the grid */
-    /* background-color: #ff0000; */
     font-family: 'Poppins', sans-serif;
     height: 280px;
     width: 100%;
