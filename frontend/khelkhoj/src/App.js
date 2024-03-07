@@ -11,6 +11,13 @@ import AddGround from './Pages/AddGround';
 import AddActivities from './Pages/AddActivities';
 import GroundDetails from './Pages/GroundDetails';
 import ActivityDetails from './Pages/ActivityDetails';
+import GroundConfirmation from './Pages/GroundConfirmation';
+import BookingDetails from './Pages/BookingDetails';
+import AllBookings from './Pages/AllBookings';
+import ClubAllBookings from './Pages/ClubAllBookings';
+import UpdateUser from './Pages/UpdateUser';
+import UpdateGround from './Pages/UpdateGround';
+import ClubGroundDetails from './Pages/ClubGroundDetails';
 
 function App() {
   return (
@@ -28,7 +35,14 @@ function App() {
         <Route path="/addGround" component={AddGround} />
         <Route path="/addActivity" component={AddActivities} />
         <Route path="/groundDetails/:groundId" component={GroundDetails} />
+        <Route path="/groundConfirmation" component={GroundConfirmation} />
+        <Route path="/bookingDetails/:bookingId" component={BookingDetails} />
         <Route path="/activityDetails/:activityId" component={ActivityDetails} />
+        <Route path="/allBookings" component={AllBookings} />
+        <Route path="/clubAllBookings" component={ClubAllBookings} />
+        <Route path="/updateUser" component={UpdateUser} />
+        <Route path="/updateGround/:groundId" component={UpdateGround} />
+        <Route path="/clubGroundDetails/:groundId" component={ClubGroundDetails} />
       </Switch>
 
     </Router>

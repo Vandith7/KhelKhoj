@@ -86,7 +86,7 @@ const Greeting = ({ name }) => {
     return () => clearInterval(typingInterval);
   }, [name]);
 
-  return <h1 className="greetUser">{displayedGreeting}</h1>;
+  return <h2 className="greetUser">{displayedGreeting}</h2>;
 };
 
 export default Greeting;

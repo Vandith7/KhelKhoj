@@ -191,6 +191,7 @@ router.get('/grounds/:clubId', (req, res) => {
         g.ground_id, 
         g.type, 
         g.description,
+        g.visibility,
         TIME_FORMAT(g.start_time, '%H:%i') AS start_time, 
         TIME_FORMAT(g.end_time, '%H:%i') AS end_time, 
         g.price, 
@@ -262,7 +263,163 @@ router.get('/activities/:clubId', (req, res) => {
     });
 });
 
+// Route to get user's bookings
+router.get('/bookings', verifyClub, (req, res) => {
+    const club_id = req.clubData.club_id;
+    const currentDate = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
 
+    const sql = `SELECT b.booking_id, DATE_FORMAT(b.date, '%Y-%m-%d') AS date,g.type AS ground_type, b.booking_start_time, b.booking_end_time, u.name AS user_name
+                 FROM bookings AS b
+                 INNER JOIN grounds AS g ON b.ground_id = g.ground_id
+                 INNER JOIN clubs AS c ON g.club_id = c.club_id
+                 INNER JOIN users AS u ON b.user_id = u.user_id
+                 WHERE g.club_id = ? AND b.date >= ?`;
+
+    db.query(sql, [club_id, currentDate], (err, results) => {
+        if (err) {
+            console.error("Error fetching user's bookings:", err);
+            return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+        }
+
+        res.json({ status: "Success", bookings: results });
+    });
+});
+
+
+router.post('/updateGround', verifyClub, upload.array('photos', 4), (req, res) => {
+    const groundId = req.body.ground_id;
+    const club_id = req.clubData.club_id;
+    const { type, description, start_time, end_time, price, visibility } = req.body;
+    const photos = req.body.photos; // Get paths of uploaded photos
+
+    // Initialize arrays to hold values and update queries
+    const updateValues = [];
+    const updateQueries = [];
+
+    // Build update queries and values for each field that is provided
+    if (club_id) {
+        updateQueries.push("club_id = ?");
+        updateValues.push(club_id);
+    }
+    if (type) {
+        updateQueries.push("type = ?");
+        updateValues.push(type);
+    }
+    if (description) {
+        updateQueries.push("description = ?");
+        updateValues.push(description);
+    }
+    if (start_time) {
+        updateQueries.push("start_time = ?");
+        updateValues.push(start_time);
+    }
+    if (end_time) {
+        updateQueries.push("end_time = ?");
+        updateValues.push(end_time);
+    }
+    if (price) {
+        updateQueries.push("price = ?");
+        updateValues.push(price);
+    }
+    if (visibility) {
+        updateQueries.push("visibility = ?");
+        updateValues.push(visibility);
+    }
+    if (photos && photos.length > 0) {
+        // If photos are provided, update photo paths
+        for (let i = 0; i < photos.length; i++) {
+            updateQueries.push(`photo${i + 1} = ?`);
+            updateValues.push(photos[i]);
+        }
+    }
+
+    // Construct the SQL update query
+    let sql = "UPDATE grounds SET " + updateQueries.join(', ') + " WHERE ground_id = ?";
+    updateValues.push(groundId);
+
+    db.query(sql, updateValues, (updateErr, updateResult) => {
+        if (updateErr) {
+            return res.status(500).json({ error: "Error updating ground details" });
+        }
+
+        return res.json({ status: "Success", message: "Ground details updated successfully" });
+    });
+});
+
+
+router.post('/checkCredentials', (req, res) => {
+    const { userId, password } = req.body;
+
+    // Query to retrieve user data based on userId
+    const getUserQuery = 'SELECT * FROM clubs WHERE club_id = ?';
+
+    // Execute the query
+    db.query(getUserQuery, [userId], (err, results) => {
+        if (err) {
+            console.error("Error checking credentials:", err);
+            return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+        }
+
+        // Check if user with the provided userId exists
+        if (results.length === 0) {
+            return res.status(404).json({ status: "Error", error: "User not found" });
+        }
+
+        // User found, compare passwords
+        const user = results[0];
+        bcrypt.compare(password.toString(), user.password, (compareErr, compareResult) => {
+            if (compareErr) {
+                console.error("Error comparing passwords:", compareErr);
+                return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+            }
+
+            // Passwords match
+            if (compareResult) {
+                return res.json({ status: "Success", message: "Valid credentials" });
+            } else {
+                return res.status(401).json({ status: "Error", error: "Password not matched" });
+            }
+        });
+    });
+});
+
+router.post('/grounds/:groundId', verifyClub, (req, res) => {
+    const groundId = req.params.groundId;
+    const clubId = req.clubData.club_id;
+
+    // Query to check if there are any bookings associated with the ground
+    const checkBookingsSql = "SELECT COUNT(*) AS count FROM bookings WHERE ground_id = ?";
+    db.query(checkBookingsSql, [groundId], (err, result) => {
+        if (err) {
+            console.error("Error checking bookings:", err);
+            return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+        }
+
+        const numberOfBookings = result[0].count;
+
+        if (numberOfBookings > 0) {
+            // If there are bookings associated with the ground, return an error message
+            return res.status(401).json({ status: "Error", error: "Cannot delete ground with existing bookings" });
+        }
+
+        // If there are no bookings associated with the ground, proceed with deleting it
+        const deleteGroundSql = "DELETE FROM grounds WHERE ground_id = ? AND club_id = ?";
+        db.query(deleteGroundSql, [groundId, clubId], (err, result) => {
+            if (err) {
+                console.error("Error deleting ground:", err);
+                return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+            }
+
+            if (result.affectedRows === 0) {
+                // If no rows were affected, it means the ground was not found or does not belong to the club
+                return res.status(404).json({ status: "Error", error: "Ground not found or does not belong to the club" });
+            }
+
+            // If the ground was successfully deleted
+            return res.json({ status: "Success", message: "Ground deleted successfully" });
+        });
+    });
+});
 
 
 module.exports = router;

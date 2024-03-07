@@ -71,7 +71,7 @@ function Welcome() {
       </div>
       <div ref={infoRef} className="info">
         <div className="users">
-          <h1>Discover, Book, and Play</h1>
+          <h2>Discover, Book, and Play</h2>
           <p>
             Embark on a journey of discovery with Khel-khoj. Our user-friendly
             platform empowers you to explore a diverse range of grounds and
@@ -91,7 +91,7 @@ function Welcome() {
           </Link>
         </div>
         <div className="users">
-          <h1>Unleash Potential of Your Venue</h1>
+          <h2>Unleash Potential of Your Venue</h2>
           <p>
             Khel-khoj provides clubs with a powerful platform to showcase their
             grounds and activities to a vibrant community of sports enthusiasts.

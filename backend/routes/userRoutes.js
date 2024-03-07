@@ -91,6 +91,42 @@ router.post('/login', (req, res) => {
     })
 });
 
+router.post('/checkCredentials', (req, res) => {
+    const { userId, password } = req.body;
+
+    // Query to retrieve user data based on userId
+    const getUserQuery = 'SELECT * FROM users WHERE user_id = ?';
+
+    // Execute the query
+    db.query(getUserQuery, [userId], (err, results) => {
+        if (err) {
+            console.error("Error checking credentials:", err);
+            return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+        }
+
+        // Check if user with the provided userId exists
+        if (results.length === 0) {
+            return res.status(404).json({ status: "Error", error: "User not found" });
+        }
+
+        // User found, compare passwords
+        const user = results[0];
+        bcrypt.compare(password.toString(), user.password, (compareErr, compareResult) => {
+            if (compareErr) {
+                console.error("Error comparing passwords:", compareErr);
+                return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+            }
+
+            // Passwords match
+            if (compareResult) {
+                return res.json({ status: "Success", message: "Valid credentials" });
+            } else {
+                return res.status(401).json({ status: "Error", error: "Password not matched" });
+            }
+        });
+    });
+});
+
 
 const verifyUser = (req, res, next) => {
     const user_token = req.cookies.user_token;
@@ -105,7 +141,7 @@ const verifyUser = (req, res, next) => {
                 req.name = decoded.name;
 
                 // Retrieve user data including profile_photo
-                const sql = 'SELECT name, profile_photo FROM users WHERE name=?';
+                const sql = 'SELECT name,user_id, profile_photo FROM users WHERE name=?';
                 db.query(sql, [req.name], (err, data) => {
                     if (err) {
                         return res.status(500).json({ error: "Error retrieving user data" });
@@ -121,9 +157,9 @@ const verifyUser = (req, res, next) => {
 // Protected Route for User
 router.get('/', verifyUser, (req, res) => {
     if (req.userData.profile_photo) {
-        return res.json({ status: "Success", name: req.userData.name, profile_photo: (req.userData.profile_photo).toString() });
+        return res.json({ status: "Success", user_id: req.userData.user_id, name: req.userData.name, profile_photo: (req.userData.profile_photo).toString() });
     }
-    return res.json({ status: "Success", name: req.userData.name, profile_photo: (req.userData.profile_photo) });
+    return res.json({ status: "Success", user_id: req.userData.user_id, name: req.userData.name, profile_photo: (req.userData.profile_photo) });
 });
 
 // User Logout Route
@@ -147,7 +183,8 @@ router.get('/grounds', (req, res) => {
         g.photo3,
         g.photo4
     FROM grounds AS g
-    INNER JOIN clubs AS c ON g.club_id = c.club_id`;
+    INNER JOIN clubs AS c ON g.club_id = c.club_id
+    WHERE g.visibility = 1`; // Add condition to filter visible grounds only
 
     db.query(sql, (err, results) => {
         if (err) {
@@ -166,7 +203,6 @@ router.get('/grounds', (req, res) => {
         res.json({ status: "Success", grounds: groundsWithPhotos });
     });
 });
-
 
 router.get('/activities', (req, res) => {
     const currentDate = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
@@ -224,6 +260,7 @@ router.get('/grounds/:groundId', (req, res) => {
     TIME_FORMAT(g.end_time, '%H:%i') AS end_time, 
     g.price, 
     c.name AS club_name,
+    c.description AS club_description,
     c.address,
     g.photo1,
     g.photo2,
@@ -257,6 +294,333 @@ INNER JOIN clubs AS c ON g.club_id = c.club_id
         res.json({ status: "Success", ground: groundWithPhotos });
     });
 });
+
+router.get('/activities/:activityId', (req, res) => {
+    const activityId = req.params.activityId;
+
+    const sql = `SELECT 
+        a.activity_id,
+        a.activity_name,
+        a.category,
+        a.description AS activity_description,
+        a.age_group,
+        DATE_FORMAT(a.start_date, '%Y-%m-%d') AS start_date,
+        DATE_FORMAT(a.end_date, '%Y-%m-%d') AS end_date,
+        TIME_FORMAT(a.start_time, '%H:%i') AS start_time,
+        TIME_FORMAT(a.end_time, '%H:%i') AS end_time,
+        a.instructor_info,
+        a.capacity,
+        a.price,
+        a.contact_information,
+        a.photo1,
+        a.photo2,
+        a.photo3,
+        a.photo4,
+        c.name AS club_name,
+        c.description AS club_description
+    FROM activities AS a
+    INNER JOIN clubs AS c ON a.club_id = c.club_id
+    WHERE a.activity_id = ?`;
+
+    db.query(sql, [activityId], (err, results) => {
+        if (err) {
+            console.error("Error fetching activity data:", err);
+            return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ status: "Error", error: "Activity not found" });
+        }
+
+        const activity = results[0];
+
+        // Convert photo paths to strings if they exist
+        const activityWithPhotos = {
+            ...activity,
+            photo1: activity.photo1 ? activity.photo1.toString() : null,
+            photo2: activity.photo2 ? activity.photo2.toString() : null,
+            photo3: activity.photo3 ? activity.photo3.toString() : null,
+            photo4: activity.photo4 ? activity.photo4.toString() : null
+        };
+
+        res.json({ status: "Success", activity: activityWithPhotos });
+    });
+});
+
+
+
+// User Ground Booking Route
+router.post('/grounds/:groundId/book', (req, res) => {
+    const { groundId } = req.params;
+    const { userId, date, startTime, endTime } = req.body;
+
+    // Get current time
+    const currentTime = new Date().toISOString().split('T')[1].split('.')[0];
+
+    // Check if the booking start time is in the future
+    if (date === new Date().toISOString().split('T')[0] && startTime < currentTime) {
+        return res.status(400).json({ status: "Error", error: "Cannot book past time slots for today" });
+    }
+
+    // Begin a database transaction
+    db.beginTransaction(function (err) {
+        if (err) {
+            console.error("Error beginning transaction:", err);
+            return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+        }
+
+        // Check if the slot spans across two different dates
+        let adjustedEndTime = endTime;
+        if (startTime > endTime) {
+            adjustedEndTime = '23:59:59'; // End time for the current date
+        }
+
+        // Check if the requested time slot is available
+        const availabilityQuery = `SELECT * FROM bookings 
+                                   WHERE ground_id = ? 
+                                   AND date = ? 
+                                   AND ((booking_start_time < ? AND booking_end_time > ?) 
+                                        OR (booking_start_time < ? AND booking_end_time > ?) 
+                                        OR (booking_start_time >= ? AND booking_end_time <= ?)) FOR UPDATE`;
+
+        db.query(availabilityQuery, [groundId, date, startTime, adjustedEndTime, startTime, adjustedEndTime, startTime, adjustedEndTime], (availabilityErr, availabilityResult) => {
+            if (availabilityErr) {
+                console.error("Error checking availability:", availabilityErr);
+                return db.rollback(function () {
+                    res.status(500).json({ status: "Error", error: "Internal Server Error" });
+                });
+            }
+
+            // If there are overlapping bookings, rollback transaction and return "Slot not available"
+            if (availabilityResult.length > 0) {
+                db.rollback(function () {
+                    res.status(500).json({ error: "No slots available for specified time" });
+                });
+            }
+
+            // If the slot is available, insert a new booking record
+            const insertQuery = `INSERT INTO bookings (ground_id, user_id, date, booking_start_time, booking_end_time) 
+                                 VALUES (?, ?, ?, ?, ?)`;
+
+            db.query(insertQuery, [groundId, userId, date, startTime, endTime], (insertErr, insertResult) => {
+                if (insertErr) {
+                    console.error("Error booking ground slot:", insertErr);
+                    return db.rollback(function () {
+                        // res.status(500).json({ status: "Error", error: "Internal Server Error" });
+                        res.status(500).json({ error: "No slots available for specified time" });
+                    });
+                }
+                // Commit transaction if everything is successful
+                db.commit(function (commitErr) {
+                    if (commitErr) {
+                        console.error("Error committing transaction:", commitErr);
+                        return db.rollback(function () {
+                            res.status(500).json({ status: "Error", error: "Internal Server Error" });
+                        });
+                    }
+                    return res.json({ status: "Success", message: "Ground slot booked successfully" });
+                });
+            });
+        });
+    });
+});
+
+
+
+router.get('/grounds/:groundId/bookings', (req, res) => {
+    const groundId = req.params.groundId;
+    const date = req.query.date;
+
+    const sql = `SELECT * FROM bookings WHERE ground_id = ? AND date = ?`;
+
+    db.query(sql, [groundId, date], (err, results) => {
+        if (err) {
+            console.error("Error fetching bookings:", err);
+            return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+        }
+
+        res.json({ status: "Success", bookings: results });
+    });
+});
+
+router.get('/getBookings', verifyUser, (req, res) => {
+    const user_id = req.userData.user_id;
+    const currentDate = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
+
+    const sql = `SELECT b.booking_id, DATE_FORMAT(b.date, '%Y-%m-%d') AS date, b.booking_start_time, b.booking_end_time, g.club_id, g.ground_id, g.type AS ground_type, c.name AS club_name
+                 FROM bookings AS b
+                 INNER JOIN grounds AS g ON b.ground_id = g.ground_id
+                 INNER JOIN clubs AS c ON g.club_id = c.club_id
+                 WHERE b.user_id = ? AND b.date >= ?`;
+
+    db.query(sql, [user_id, currentDate], (err, results) => {
+        if (err) {
+            console.error("Error fetching bookings:", err);
+            return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+        }
+
+        res.json({ status: "Success", bookings: results });
+    });
+});
+// User Cancel Booking Route
+router.get('/bookings/:bookingId', verifyUser, (req, res) => {
+    const bookingId = req.params.bookingId;
+    const userId = req.userData.user_id;
+
+    // Query to fetch details of the booking along with ground and club details
+    const sql = `SELECT b.*, 
+                        g.ground_id, 
+                        g.type AS ground_type, 
+                        g.description AS ground_description,
+                        g.start_time AS ground_start_time,
+                        g.end_time AS ground_end_time,
+                        g.price AS ground_price,
+                        c.club_id,
+                        c.name AS club_name,
+                        c.address AS club_address
+                 FROM bookings AS b
+                 INNER JOIN grounds AS g ON b.ground_id = g.ground_id
+                 INNER JOIN clubs AS c ON g.club_id = c.club_id
+                 WHERE b.booking_id = ? AND b.user_id = ?`;
+
+    // Execute the query
+    db.query(sql, [bookingId, userId], (err, results) => {
+        if (err) {
+            console.error("Error fetching booking details:", err);
+            return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ status: "Error", error: "Booking not found" });
+        }
+
+        const booking = results[0];
+
+        // Calculate duration
+        const startTime = new Date(`1970-01-01T${booking.booking_start_time}`);
+        const endTime = new Date(`1970-01-01T${booking.booking_end_time}`);
+        const durationMilliseconds = endTime - startTime;
+        const durationHours = Math.floor(durationMilliseconds / (1000 * 60 * 60));
+        const durationMinutes = Math.floor((durationMilliseconds % (1000 * 60 * 60)) / (1000 * 60));
+
+        const duration = `${durationHours} hours ${durationMinutes} minutes`;
+
+        // Add duration to the booking object
+        booking.duration = duration;
+
+        return res.json({ status: "Success", booking });
+    });
+});
+// User Cancel Booking Route
+router.post('/bookings/:bookingId/cancel', verifyUser, (req, res) => {
+    const bookingId = req.params.bookingId;
+    const userId = req.userData.user_id;
+
+    // Check if the booking belongs to the user
+    const checkOwnershipQuery = 'SELECT * FROM bookings WHERE booking_id = ? AND user_id = ?';
+    db.query(checkOwnershipQuery, [bookingId, userId], (checkErr, checkResults) => {
+        if (checkErr) {
+            console.error("Error checking ownership:", checkErr);
+            return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+        }
+
+        if (checkResults.length === 0) {
+            return res.status(403).json({ status: "Error", error: "You are not authorized to cancel this booking" });
+        }
+
+        // If the booking belongs to the user, proceed with cancellation
+        const cancelQuery = 'DELETE FROM bookings WHERE booking_id = ?';
+        db.query(cancelQuery, [bookingId], (cancelErr, cancelResults) => {
+            if (cancelErr) {
+                console.error("Error canceling booking:", cancelErr);
+                return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+            }
+
+            return res.json({ status: "Success", message: "Booking canceled successfully" });
+        });
+    });
+});
+
+
+router.post('/updateProfile', verifyUser, upload.single('profile_photo'), (req, res) => {
+    const userId = req.userData.user_id;
+    const { name, email } = req.body;
+    const profile_photo = req.body.profile_photo || null;
+
+    // Check if the provided email is already in use by another user
+    if (email) {
+        const emailCheckQuery = "SELECT * FROM users WHERE email = ? AND user_id != ?";
+        db.query(emailCheckQuery, [email, userId], (emailErr, emailResult) => {
+            if (emailErr) {
+                return res.status(500).json({ error: "Error checking email existence" });
+            }
+            if (emailResult.length > 0) {
+                return res.status(400).json({ error: "Email already in use" });
+            }
+
+            // Update email if available
+            const updateEmailQuery = "UPDATE users SET email = ? WHERE user_id = ?";
+            db.query(updateEmailQuery, [email, userId], (updateEmailErr, updateEmailResult) => {
+                if (updateEmailErr) {
+                    return res.status(500).json({ error: "Error updating email" });
+                }
+                // If name is also provided, update it as well
+                if (name) {
+                    updateName(name, userId, profile_photo, res);
+                } else {
+                    return res.json({ status: "Success", message: "Email updated successfully" });
+                }
+            });
+        });
+    } else if (name) {
+        // If only name is provided, update name
+        updateName(name, userId, profile_photo, res);
+    } else if (profile_photo) {
+        // If only profile photo is provided, update profile photo
+        const updateProfilePhotoQuery = "UPDATE users SET profile_photo = ? WHERE user_id = ?";
+        db.query(updateProfilePhotoQuery, [profile_photo, userId], (updatePhotoErr, updatePhotoResult) => {
+            if (updatePhotoErr) {
+                return res.status(500).json({ error: "Error updating profile photo" });
+            }
+            return res.json({ status: "Success", message: "Profile photo updated successfully" });
+        });
+    } else {
+        return res.status(400).json({ error: "No data provided for update" });
+    }
+});
+
+// Function to update name
+function updateName(name, userId, profile_photo, res) {
+    const nameCheckQuery = "SELECT * FROM users WHERE name = ? AND user_id != ?";
+    db.query(nameCheckQuery, [name, userId], (nameErr, nameResult) => {
+        if (nameErr) {
+            return res.status(500).json({ error: "Error checking name existence" });
+        }
+        if (nameResult.length > 0) {
+            return res.status(400).json({ error: "User name already in use" });
+        }
+
+        const updateNameQuery = "UPDATE users SET name = ? WHERE user_id = ?";
+        db.query(updateNameQuery, [name, userId], (updateNameErr, updateNameResult) => {
+            if (updateNameErr) {
+                return res.status(500).json({ error: "Error updating name" });
+            }
+            if (profile_photo) {
+                // If profile photo is also provided, update it
+                const updateProfilePhotoQuery = "UPDATE users SET profile_photo = ? WHERE user_id = ?";
+                db.query(updateProfilePhotoQuery, [profile_photo, userId], (updatePhotoErr, updatePhotoResult) => {
+                    if (updatePhotoErr) {
+                        return res.status(500).json({ error: "Error updating profile photo" });
+                    }
+                    return res.json({ status: "Success", message: "Name and profile photo updated successfully" });
+                });
+            } else {
+                return res.json({ status: "Success", message: "Name updated successfully" });
+            }
+        });
+    });
+}
+
 
 
 module.exports = router;

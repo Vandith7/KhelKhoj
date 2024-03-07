@@ -20,6 +20,10 @@ import {
   faCalendar,
   faTicketAlt,
   faIdCard,
+  faCalendarDay,
+  faCalendarXmark,
+  faUser,
+  faEye,
 } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import ClubGreetings from "../Components/ClubGreetings";
@@ -33,6 +37,7 @@ function WelcomeClub() {
   const [hasName, setHasName] = useState(false);
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [showTooltip, setShowTooltip] = useState(false); // State to manage tooltip visibility
+  const [bookings, setBookings] = useState(null);
   const navigate = useHistory();
 
   const handleLogout = () => {
@@ -70,6 +75,11 @@ function WelcomeClub() {
               .catch((err) => {
                 console.error(err);
               });
+            axios.get(`http://localhost:3001/club/bookings/`).then((res) => {
+              if (res.data.status === "Success") {
+                setBookings(res.data.bookings);
+              }
+            });
             axios
               .get(`http://localhost:3001/club/grounds/${clubId}`) // Update the endpoint to accept club_id
               .then((res) => {
@@ -91,7 +101,18 @@ function WelcomeClub() {
         console.error(err);
       });
   }, [auth, navigate, hasName]);
-
+  function convertTo12HourFormat(timeString) {
+    const [hour, minute] = timeString.split(":");
+    const hourInt = parseInt(hour);
+    const suffix = hourInt >= 12 ? "PM" : "AM";
+    const hour12 = hourInt % 12 || 12;
+    return `${hour12}:${minute} ${suffix}`;
+  }
+  function formatDate(dateString) {
+    const options = { day: "numeric", month: "short", year: "numeric" };
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", options);
+  }
   return !auth ? (
     <ClubLogin />
   ) : (
@@ -112,13 +133,13 @@ function WelcomeClub() {
         <div className="nav-links">
           <ul className="ulLink">
             <li>
-              <Link to="/" className="links">
+              <div className="links">
                 <img
                   className="userProfile"
                   src={profilePhoto || defaultDp}
                   alt="Khel-Khoj"
                 />
-              </Link>
+              </div>
             </li>
             <li
               className="logoutButton"
@@ -138,14 +159,107 @@ function WelcomeClub() {
       </div>
       <div className="main">
         <div className="leftBar">
-          <h2>
+          <h2 style={{ color: "black" }}>
             <FontAwesomeIcon
               style={{ fontSize: 24, marginRight: "5%" }}
               icon={faCalendarDays}
             />
             Upcoming bookings
           </h2>
-          <ul className="leftCardContainer"></ul>
+          <ul className="leftCardContainer">
+            {bookings ? (
+              // Filter and sort the bookings to display only upcoming ones
+              bookings
+                .filter(
+                  (booking) =>
+                    new Date(`${booking.date}T${booking.booking_end_time}`) >
+                    new Date()
+                )
+                .sort((a, b) => {
+                  const dateComparison = new Date(a.date) - new Date(b.date);
+                  if (dateComparison !== 0) {
+                    return dateComparison;
+                  } else {
+                    return (
+                      new Date(`1970-01-01T${a.booking_start_time}`) -
+                      new Date(`1970-01-01T${b.booking_start_time}`)
+                    );
+                  }
+                }).length > 0 ? (
+                // If there are upcoming bookings, display them
+                bookings
+                  .filter(
+                    (booking) =>
+                      new Date(`${booking.date}T${booking.booking_end_time}`) >
+                      new Date()
+                  )
+                  .sort((a, b) => {
+                    const dateComparison = new Date(a.date) - new Date(b.date);
+                    if (dateComparison !== 0) {
+                      return dateComparison;
+                    } else {
+                      return (
+                        new Date(`1970-01-01T${a.booking_start_time}`) -
+                        new Date(`1970-01-01T${b.booking_start_time}`)
+                      );
+                    }
+                  })
+                  .map((booking) => (
+                    <Link className="cardsLeft" key={booking.booking_id}>
+                      <h2 className="venueLeft">
+                        <FontAwesomeIcon
+                          style={{ fontSize: 18, marginRight: "2%" }}
+                          icon={faUser}
+                        />
+                        {booking.user_name}
+                      </h2>
+                      <p className="dayLeft">
+                        <FontAwesomeIcon
+                          style={{ fontSize: 15, marginRight: "2%" }}
+                          icon={faCalendarDay}
+                        />
+                        {formatDate(booking.date)}
+                      </p>
+                      <p className="dayLeft">
+                        <FontAwesomeIcon
+                          style={{ fontSize: 15, marginRight: "2%" }}
+                          icon={faFlag}
+                        />
+                        {booking.ground_type}
+                      </p>
+                      <p className="slotLeft">
+                        <FontAwesomeIcon
+                          style={{ fontSize: 15, marginRight: "2%" }}
+                          icon={faClock}
+                        />
+                        {convertTo12HourFormat(
+                          booking.booking_start_time.slice(0, 5)
+                        )}{" "}
+                        to{" "}
+                        {convertTo12HourFormat(
+                          booking.booking_end_time.slice(0, 5)
+                        )}
+                      </p>
+                    </Link>
+                  ))
+              ) : (
+                // If there are no upcoming bookings, display a message
+                <div className="noBookings">
+                  <FontAwesomeIcon
+                    style={{ fontSize: 55, marginRight: "2%" }}
+                    icon={faCalendarXmark}
+                  />
+                  <h3>No upcoming bookings</h3>
+                </div>
+              )
+            ) : (
+              // If bookings data is not available, display loading or placeholder
+              <div>Loading...</div>
+            )}
+            <Link to="/clubAllBookings" className="seeAll">
+              See all
+            </Link>
+          </ul>
         </div>
         <div className="rightBar">
           <div className="greetContainer">
@@ -157,7 +271,11 @@ function WelcomeClub() {
                 <h1 style={{ color: "#F99810" }}> Your Grounds </h1>
                 <div>
                   {grounds.map((ground) => (
-                    <li key={ground.ground_id} className="groundClubCard">
+                    <Link
+                      to={`/clubGroundDetails/${ground.ground_id}`}
+                      key={ground.ground_id}
+                      className="groundClubCard"
+                    >
                       {ground.photo1 && (
                         <img
                           className="groundClubPic"
@@ -175,10 +293,21 @@ function WelcomeClub() {
                       <p>
                         <FontAwesomeIcon
                           style={{ fontSize: 15, marginRight: "2%" }}
+                          icon={faEye}
+                        />
+                        Booking Availability:{" "}
+                        {ground.visibility === 1
+                          ? "(Open for booking)"
+                          : "(Not available for booking)"}
+                      </p>
+                      <p>
+                        <FontAwesomeIcon
+                          style={{ fontSize: 15, marginRight: "2%" }}
                           icon={faCircleInfo}
                         />
                         Details: {ground.description}
                       </p>
+
                       <p>
                         <FontAwesomeIcon
                           style={{ fontSize: 15, marginRight: "2%" }}
@@ -200,7 +329,7 @@ function WelcomeClub() {
                         />
                         Price: {ground.price}
                       </p>
-                    </li>
+                    </Link>
                   ))}
                 </div>
                 <div>

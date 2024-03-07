@@ -1,0 +1,93 @@
+.containerConfirm {
+  display: flex;
+  /* justify-content: center; */
+  background-color: #fcfaf8;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding-bottom: 6%;
+  font-family: "Poppins", sans-serif;
+}
+
+.conMessage {
+  margin-top: -2px;
+}
+
+.backHomeCon {
+  cursor: pointer;
+  text-decoration: none;
+  color: #000;
+}
+
+.confirmationContainer {
+  height: 420px;
+  background-color: #f4efe8;
+  width: 30%;
+  border-radius: 20px;
+  padding: 1%;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 8px;
+  margin-top: 6%;
+}
+
+.backButtonContainer {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+}
+
+.headingCon {
+  margin-left: 20%;
+  font-weight: 600;
+}
+
+.backConfirmContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 5%;
+  align-items: center;
+  height: 10%;
+  width: 100%;
+  gap: 10px;
+}
+
+.backConfirm {
+  transition: all 0.5s ease;
+  display: flex;
+  text-decoration: none;
+  color: #fff;
+  background-color: #000;
+
+  align-items: center;
+  border-radius: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  justify-content: center;
+  height: 100%;
+  width: 40%;
+}
+
+.backConfirm:hover {
+  color: #000;
+  background-color: #f99810;
+}
+
+.cancelBooking {
+  transition: all 0.5s ease;
+  display: flex;
+  text-decoration: none;
+  color: #fff;
+  background-color: #ff0000;
+  align-items: center;
+  border-radius: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  justify-content: center;
+  height: 100%;
+  width: 40%;
+}
+
+.cancelBooking:hover {
+  color: #fff;
+  background-color: #c70000;
+}

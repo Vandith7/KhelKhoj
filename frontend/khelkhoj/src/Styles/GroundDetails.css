@@ -1,227 +1,275 @@
-.mainGroundDetails{
-    font-family: 'Poppins',sans-serif;
-    display: flex;
-    height: auto;
-    width:100%;
-    margin-bottom: 5%;
-    /* background-color: aqua; */
+.mainGroundDetails {
+  font-family: "Poppins", sans-serif;
+  display: flex;
+  height: auto;
+  width: 100%;
+  margin-bottom: 5%;
+  /* background-color: aqua; */
 }
 
-.leftGroundDetContainer{
-    width: 68%;
-    margin-left: 4%;
-    height: 100%;
-    /* background-color: blue; */
+.leftGroundDetContainer {
+  width: 68%;
+  margin-left: 4%;
+  height: 100%;
+  /* background-color: blue; */
 }
 
-.photoContainer{
-    display: flex;
-    flex-direction: row;
-    height: 500px;
-    width: 100%;
-    margin-left: -40px;
+.photoContainer {
+  display: flex;
+  flex-direction: row;
+  height: 500px;
+  width: 100%;
+  margin-left: -40px;
 }
-.groundImage{
-    height: 100%;
-    width: 100%;
-    object-fit: cover;
-    border-radius: 10px;
-    box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 8px;
+.groundImage {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 8px;
 }
 .arrow {
-    height: 40px;
-    margin-top: 20%;
-    font-weight: 200;
-    cursor: pointer;
-    color: #000;
-    position: relative;
-     transition: all .5s ease;
+  height: 40px;
+  margin-top: 20%;
+  font-weight: 200;
+  cursor: pointer;
+  color: #000;
+  position: relative;
+  transition: all 0.5s ease;
 }
 
-.arrow:hover{
-    color: #F99810;
+.arrow:hover {
+  color: #f99810;
 }
 
 .leftArrow {
-    position: relative; 
-    margin-right: 1%;
+  position: relative;
+  margin-right: 1%;
 }
 
 .rightArrow {
-    position: relative;
-    margin-left: 1%;
+  position: relative;
+  margin-left: 1%;
 }
 
-
-.indicatorContainer{
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
+.indicatorContainer {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
 }
 
 .photoIndicators {
-    display: flex;
-    justify-content: center;
-    margin-top: 10px;
-  }
-  
-  .photoIndicator {
-    width: 10px;
-    height: 10px;
-    background-color: #bbb;
-    border-radius: 50%;
-    margin: 0 5px;
-  }
-  
-  .photoIndicator.active {
-    background-color: #F99810;
-  }
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
 
-  .detailsContainer{
-    width: 90%;
-    height: auto;
-    padding: 2%;
-    border-radius: 10px;
-    margin-left: -3px;
-    margin-top: 2%;
-    border: solid #bbb 2px;
-  }
+.photoIndicator {
+  width: 10px;
+  height: 10px;
+  background-color: #bbb;
+  border-radius: 50%;
+  margin: 0 5px;
+}
 
-  .groundDetDesc{
-    font-size: 20px;
-    font-weight: 400;
-  }
-  
-  .groundDetPrice{
-    font-size: 20px;
-    font-weight: 500;
-  }
+.photoIndicator.active {
+  background-color: #f99810;
+}
 
-  .rightGroundDetContainer{
-    display: flex;
-    padding-right: 5%;
-    height: auto;
-    flex-direction: column;
-    width: 32%;
-  }
+.detailsContainer {
+  width: 90%;
+  height: auto;
+  padding: 2%;
+  border-radius: 10px;
+  margin-left: -3px;
+  margin-top: 2%;
+  border: solid #bbb 2px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
 
-  .rightTiming{
-display: flex;
-flex-direction: column;
-justify-content: center;
-margin-top: 20%;
-padding: 2%;
-padding-left: 4%;
-border-radius: 10px;
-border: solid #bbb 2px;
-  }
+.groundDetDesc {
+  font-size: 20px;
+  font-weight: 400;
+}
 
-  .groundTiming{
-    font-size: 20px;
-    font-weight: 400;
-    margin-top: -4px;
-  }
+.groundDetPrice {
+  font-size: 20px;
+  font-weight: 500;
+}
 
-  .bookNowButton{
-background-color: #F99810;
-color: #000;
-font-weight: 500;
-display: flex;
-justify-content: center;
-align-items: center;
-font-size: 22px;
-border-radius: 20px;
-transition: all 0.5s ease;
-cursor: pointer;
-margin-top: 5%;
-  }
+.rightGroundDetContainer {
+  display: flex;
+  padding-right: 5%;
+  height: auto;
+  flex-direction: column;
+  width: 32%;
+}
 
-  .bookNowButton:hover{
-    color:#FFF ;
-    background-color:#000 ;
-  }
+.rightTiming {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-top: 20%;
+  padding: 2%;
+  padding-left: 4%;
+  border-radius: 10px;
+  border: solid #bbb 2px;
+}
 
-  .groundAddress{
-    text-decoration: none;
-    font-weight: 500;
-    margin-top: -6px;
-    padding-bottom: 4%;
-    color: #000;
-    transition: all 0.5s ease;
-  }
+.groundTiming {
+  font-size: 20px;
+  font-weight: 400;
+  margin-top: -4px;
+}
 
-  .groundAddress:hover{
-    color: #F99810;
-  }
+.bookNowButton {
+  background-color: #f99810;
+  color: #000;
+  text-decoration: none;
+  font-weight: 500;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 22px;
+  border-radius: 20px;
+  transition: all 0.5s ease;
+  cursor: pointer;
+  margin-top: 5%;
+}
 
-  .bookNowContainer{
-    height: auto;
-    display: flex;
-    flex-direction: column;
-    padding: 4%;
-    margin-top: 4%;
-    border-radius: 10px;
-    border: solid #bbb 2px;
-  }
+.bookNowButton:hover {
+  color: #fff;
+  background-color: #000;
+}
 
-  .dateContainer{
-    display: flex;
-    align-items: center;
-  }
+.updateGroundNowButton {
+  color: #fff;
+  background-color: #000;
+  text-decoration: none;
+  font-weight: 500;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 22px;
+  border-radius: 20px;
+  transition: all 0.5s ease;
+  cursor: pointer;
+  margin-top: 5%;
+}
 
-  .durationButtons{
-    color: #000;
-    background-color: #F99810;
-    border-radius: 50px;
-    cursor: pointer;
-  }
+.updateGroundNowButton:hover {
+  background-color: #f99810;
+  color: #000;
+}
 
-  .timeContainer{
-    display: flex;
-    align-items: center;
-    flex-direction: row;
-  }
+.clubGroundDeleteNowButton {
+  color: #fff;
+  background-color: #ff0000;
+  text-decoration: none;
+  font-weight: 500;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 22px;
+  border-radius: 20px;
+  transition: all 0.5s ease;
+  cursor: pointer;
+  margin-top: 5%;
+}
 
-  .durationContainer{
-    display: flex;
-    align-items: center;
-  }
+.clubGroundDeleteNowButton:hover {
+  color: #fff;
+  background-color: #c70000;
+}
 
-  .dateGroundBook{
-    width: 60%;
-    font-family: 'Poppins',sans-serif;
-    /* border: none; */
-    border-radius: 10px;
-    height: 60%;
-    margin-left: 60px;
-    text-align: center;
-  }
+.groundAddress {
+  text-decoration: none;
+  font-weight: 500;
+  margin-top: -6px;
+  padding-bottom: 4%;
+  color: #000;
+  transition: all 0.5s ease;
+}
 
-  .durationGroundBook{
-    width: 60%;
-    font-family: 'Poppins',sans-serif;
-    border: solid #000 2px;
-    border-radius: 10px;
-    height: 60%;
-    text-align: center;
-    margin-left: 20px;
-  }
+.groundAddress:hover {
+  color: #f99810;
+}
 
-  .durationControl{
-    width: 60%;
-    font-family: 'Poppins',sans-serif;
-    border: none;
-    border-radius: 10px;
-    height: 60%;
-    margin-left: 52px;
-  }
+.bookNowContainer {
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 4%;
+  margin-top: 4%;
+  border-radius: 10px;
+  border: solid #bbb 2px;
+}
 
-  .durationText{
-    width: 60%;
-    font-family: 'Poppins',sans-serif;
-    margin-right: 2%;
-    margin-left: 2%;
-    border-radius: 10px;
-    height: 60%;
-    text-align: center;
-  }
+.dateContainer {
+  display: flex;
+  align-items: center;
+}
+
+.durationButtons {
+  color: #000;
+  background-color: #f99810;
+  border-radius: 50px;
+  cursor: pointer;
+}
+
+.timeContainerGround {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+}
+
+.durationContainer {
+  display: flex;
+  align-items: center;
+}
+
+.dateGroundBook {
+  width: 60%;
+  font-family: "Poppins", sans-serif;
+  /* border: none; */
+  border-radius: 10px;
+  height: 60%;
+  margin-left: 60px;
+  text-align: center;
+}
+
+.durationGroundBook {
+  width: 60%;
+  font-family: "Poppins", sans-serif;
+  border: solid #000 2px;
+  border-radius: 10px;
+  height: 60%;
+  text-align: center;
+  margin-left: 20px;
+}
+
+.durationControl {
+  width: 60%;
+  font-family: "Poppins", sans-serif;
+  border: none;
+  border-radius: 10px;
+  height: 60%;
+  margin-left: 52px;
+}
+
+.durationText {
+  width: 60%;
+  font-family: "Poppins", sans-serif;
+  margin-right: 2%;
+  margin-left: 2%;
+  border-radius: 10px;
+  height: 60%;
+  text-align: center;
+}
+
+.slotErrorContainer {
+  text-align: center;
+  width: 100%;
+  color: #ff0000;
+}

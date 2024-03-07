@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import "../Styles/WelcomeUser.css";
 import { Link, useHistory } from "react-router-dom";
 import logo from "../assets/KhelKhojLogo.png";
@@ -9,7 +9,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCalendarDays,
   faLocationDot,
-  faFutbol,
   faCalendarDay,
   faRightFromBracket,
   faClock,
@@ -21,6 +20,7 @@ import {
   faFireFlameCurved,
   faPeopleGroup,
   faTicketAlt,
+  faCalendarXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import Greeting from "../Components/Greetings";
@@ -37,6 +37,7 @@ function WelcomeUser() {
   const [latitude, setLatitude] = useState(null); // State to store latitude
   const [longitude, setLongitude] = useState(null);
   const [searchQuery, setSearchQuery] = useState(""); // State to store longitude
+  const [bookings, setBookings] = useState(null);
   const navigate = useHistory();
 
   function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -53,7 +54,11 @@ function WelcomeUser() {
     const distance = R * c; // Distance in kilometers
     return distance;
   }
-
+  function formatDate(dateString) {
+    const options = { day: "numeric", month: "short", year: "numeric" };
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", options);
+  }
   // Define the extractLatLongFromURL function
   function extractLatLongFromURL(url) {
     const regex = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
@@ -68,20 +73,23 @@ function WelcomeUser() {
   }
 
   // Define the getDistanceBetweenLocations function
-  function getDistanceBetweenLocations(groundUrl, userLat, userLong) {
-    const groundLatLong = extractLatLongFromURL(groundUrl);
-    if (groundLatLong) {
-      const distance = calculateDistance(
-        groundLatLong.lat,
-        groundLatLong.long,
-        userLat,
-        userLong
-      );
-      return distance.toFixed(2); // Round to 2 decimal places
-    } else {
-      return null;
-    }
-  }
+  const getDistanceBetweenLocations = useCallback(
+    (groundUrl, userLat, userLong) => {
+      const groundLatLong = extractLatLongFromURL(groundUrl);
+      if (groundLatLong) {
+        const distance = calculateDistance(
+          groundLatLong.lat,
+          groundLatLong.long,
+          userLat,
+          userLong
+        );
+        return distance.toFixed(2);
+      } else {
+        return null;
+      }
+    },
+    []
+  );
 
   // Function to handle search input change
   const handleSearchChange = (event) => {
@@ -199,8 +207,27 @@ function WelcomeUser() {
       .catch((err) => {
         console.error(err);
       });
-  }, [latitude, longitude, hasName, navigate, auth]);
 
+    axios.get(`http://localhost:3001/user/getBookings/`).then((res) => {
+      if (res.data.status === "Success") {
+        setBookings(res.data.bookings);
+      }
+    });
+  }, [
+    latitude,
+    longitude,
+    hasName,
+    navigate,
+    auth,
+    getDistanceBetweenLocations,
+  ]);
+  function convertTo12HourFormat(timeString) {
+    const [hour, minute] = timeString.split(":");
+    const hourInt = parseInt(hour);
+    const suffix = hourInt >= 12 ? "PM" : "AM";
+    const hour12 = hourInt % 12 || 12;
+    return `${hour12}:${minute} ${suffix}`;
+  }
   return !auth ? (
     <UserLogin />
   ) : (
@@ -222,7 +249,7 @@ function WelcomeUser() {
           <div className="searchContainer">
             <input
               type="text"
-              placeholder="Search for grounds and activities of your favourite club"
+              placeholder="Search for grounds and activities of your favourite club "
               className="searchBox"
               value={searchQuery}
               onChange={handleSearchChange}
@@ -230,7 +257,7 @@ function WelcomeUser() {
           </div>
           <ul className="ulLink">
             <li>
-              <Link to="/" className="links">
+              <Link to="/updateUser" className="links">
                 <img
                   className="userProfile"
                   src={profilePhoto || defaultDp}
@@ -256,48 +283,106 @@ function WelcomeUser() {
       </div>
       <div className="main">
         <div className="leftBar">
-          <h2>
+          <h2 style={{ color: "#000" }}>
             <FontAwesomeIcon
-              style={{ fontSize: 24, marginRight: "5%" }}
+              style={{ fontSize: 24, marginRight: "5%", color: "#000" }}
               icon={faCalendarDays}
             />
             Upcoming bookings
           </h2>
           <ul className="leftCardContainer">
-            <div className="cardsLeft">
-              <h2 className="venueLeft">
-                <FontAwesomeIcon
-                  style={{ fontSize: 18, marginRight: "2%" }}
-                  icon={faLocationDot}
-                />
-                Venue{" "}
-              </h2>
-              <p className="activityLeft">
-                {" "}
-                <FontAwesomeIcon
-                  style={{ fontSize: 15, marginRight: "2%" }}
-                  icon={faFutbol}
-                />
-                Activity
-              </p>
-              <p className="dayLeft">
-                <FontAwesomeIcon
-                  style={{ fontSize: 15, marginRight: "2%" }}
-                  icon={faCalendarDay}
-                />
-                Today
-              </p>
-              <p className="slotLeft">
-                <FontAwesomeIcon
-                  style={{ fontSize: 15, marginRight: "2%" }}
-                  icon={faClock}
-                />
-                00:00 to 00:00
-              </p>
-            </div>
-            <div className="cardsLeft"></div>
-            <div className="cardsLeft"></div>
-            <div className="cardsLeft"></div>
+            {bookings ? (
+              bookings
+                .filter(
+                  (booking) =>
+                    new Date(`${booking.date}T${booking.booking_end_time}`) >
+                    new Date()
+                ) // Filter out bookings whose end time has passed
+                .sort((a, b) => {
+                  const dateComparison = new Date(a.date) - new Date(b.date);
+                  if (dateComparison !== 0) {
+                    return dateComparison;
+                  } else {
+                    return (
+                      new Date(`1970-01-01T${a.booking_start_time}`) -
+                      new Date(`1970-01-01T${b.booking_start_time}`)
+                    );
+                  }
+                }).length > 0 ? (
+                bookings
+                  .filter(
+                    (booking) =>
+                      new Date(`${booking.date}T${booking.booking_end_time}`) >
+                      new Date()
+                  )
+                  .sort((a, b) => {
+                    const dateComparison = new Date(a.date) - new Date(b.date);
+                    if (dateComparison !== 0) {
+                      return dateComparison;
+                    } else {
+                      return (
+                        new Date(`1970-01-01T${a.booking_start_time}`) -
+                        new Date(`1970-01-01T${b.booking_start_time}`)
+                      );
+                    }
+                  })
+                  .map((booking) => (
+                    <Link
+                      to={`/bookingDetails/${booking.booking_id}`}
+                      className="cardsLeft"
+                      key={booking.booking_id}
+                    >
+                      <h2 className="venueLeft">
+                        <FontAwesomeIcon
+                          style={{ fontSize: 18, marginRight: "2%" }}
+                          icon={faLocationDot}
+                        />
+                        {booking.club_name}
+                      </h2>
+                      <p className="activityLeft">
+                        <FontAwesomeIcon
+                          style={{ fontSize: 15, marginRight: "2%" }}
+                          icon={faFlag}
+                        />
+                        {booking.ground_type}
+                      </p>
+                      <p className="dayLeft">
+                        <FontAwesomeIcon
+                          style={{ fontSize: 15, marginRight: "2%" }}
+                          icon={faCalendarDay}
+                        />
+                        {formatDate(booking.date)}
+                      </p>
+                      <p className="slotLeft">
+                        <FontAwesomeIcon
+                          style={{ fontSize: 15, marginRight: "2%" }}
+                          icon={faClock}
+                        />
+                        {convertTo12HourFormat(
+                          booking.booking_start_time.slice(0, 5)
+                        )}{" "}
+                        to{" "}
+                        {convertTo12HourFormat(
+                          booking.booking_end_time.slice(0, 5)
+                        )}
+                      </p>
+                    </Link>
+                  ))
+              ) : (
+                <div className="noBookings">
+                  <FontAwesomeIcon
+                    style={{ fontSize: 55, marginRight: "2%" }}
+                    icon={faCalendarXmark}
+                  />
+                  <h3>No upcoming bookings</h3>
+                </div>
+              )
+            ) : (
+              <div>Loading...</div>
+            )}
+            <Link to="/allBookings" className="seeAll">
+              See all
+            </Link>
           </ul>
         </div>
         <div className="rightBar">
@@ -372,14 +457,14 @@ function WelcomeUser() {
                         style={{ fontSize: 15, marginRight: "2%" }}
                         icon={faHourglassStart}
                       />
-                      Opens at {ground.start_time}
+                      Opens at {convertTo12HourFormat(ground.start_time)}
                     </p>
                     <p>
                       <FontAwesomeIcon
                         style={{ fontSize: 15, marginRight: "2%" }}
                         icon={faHourglassEnd}
                       />
-                      Closes at {ground.end_time}
+                      Closes at {convertTo12HourFormat(ground.end_time)}
                     </p>
                     <p>
                       <FontAwesomeIcon
@@ -465,7 +550,8 @@ function WelcomeUser() {
                         style={{ fontSize: 15, marginRight: "2%" }}
                         icon={faHourglassHalf}
                       />
-                      Timings: {activity.start_time} - {activity.end_time}
+                      Timings: {convertTo12HourFormat(activity.start_time)} -{" "}
+                      {convertTo12HourFormat(activity.end_time)}
                     </p>
                     <p>
                       <FontAwesomeIcon

@@ -1,0 +1,125 @@
+.modalContainer {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.3); /* Semi-transparent black background */
+  backdrop-filter: blur(10px);
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modalBox {
+  font-family: "Poppins", sans-serif;
+  height: 48%;
+  padding: 1%;
+  border-radius: 10px;
+  background-color: #fcfaf8;
+  width: 50%;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 8px;
+}
+
+.inputFieldPassBookConfirm {
+  height: 20%;
+  padding: 14px;
+  margin-bottom: 10px;
+  border: 2px solid #cbb89e;
+  border-radius: 10px;
+  outline: none;
+  font-family: "Montserrat", sans-serif;
+  font-size: 18px;
+  width: calc(100% - 40px);
+  padding-right: 40px;
+  padding-left: 30px;
+}
+
+.inputFieldPassBookConfirm::placeholder {
+  color: #9d7947;
+  font-size: 18px;
+  opacity: 1;
+}
+
+.inputFieldPassBookConfirm:focus {
+  border-color: #000;
+}
+.eyeIconBook {
+  transition: all 0.5s ease;
+  height: 30%;
+  padding-bottom: 10px;
+  margin-right: px;
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  cursor: pointer;
+  z-index: 1;
+}
+.eyeIconBook:hover {
+  color: #f19006;
+}
+
+.bookConButtonsContainer {
+  height: 20%;
+  padding: 1%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  gap: 20px;
+}
+
+.bookConButtonCan {
+  transition: all 0.5s ease;
+  background-color: #000;
+  color: white;
+  cursor: pointer;
+  border-radius: 10px;
+  height: 60%;
+  width: 20%;
+  display: flex;
+  font-weight: 500;
+  justify-content: center;
+  align-items: center;
+}
+
+.bookConButton {
+  transition: all 0.5s ease;
+  background-color: #f19006;
+  color: #000;
+  cursor: pointer;
+  border-radius: 10px;
+  height: 60%;
+  width: 20%;
+  display: flex;
+  font-weight: 500;
+  justify-content: center;
+  align-items: center;
+}
+
+.bookConButtonCan:hover {
+  background-color: #f19006;
+  color: #000;
+}
+
+.bookCanButtonCan {
+  transition: all 0.5s ease;
+  color: #fff;
+  background-color: #ff0000;
+  cursor: pointer;
+  border-radius: 10px;
+  height: 60%;
+  width: 20%;
+  display: flex;
+  font-weight: 500;
+  justify-content: center;
+  align-items: center;
+}
+
+.bookCanButtonCan:hover {
+  color: #fff;
+  background-color: #c70000;
+}
+
+.confirmationError {
+  width: 100%;
+}

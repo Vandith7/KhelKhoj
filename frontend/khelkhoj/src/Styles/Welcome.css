@@ -1,147 +1,146 @@
-body{
-    top: 0;
-    right: 0;
-    font-family: 'Roboto',sans-serif;
+body {
+  top: 0;
+  right: 0;
+  font-family: "Roboto", sans-serif;
 }
 
 .container {
-    display: flex; 
-    flex-direction: column;
-    align-items: center;
-    height: 100%;
-    background-color: #FCFAF8;
-    width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  background-color: #fcfaf8;
+  width: 100%;
 }
-.header{
-    display: flex;
-    align-items: center;
-    font-size: 23px;
-    font-weight: 700;
-    height: 8%;
-    width: 100%;
-    background-color: #FCFAF8;
-    box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 8px;
-    position: sticky;
-    top: 0;
-    z-index: 99;
-}
-
-.logo{
-    height: 60px;
-    width: 60px;
-    padding-left: 1%;
-    padding-right: 0.5%;
-}
-.hero{
-    display: flex;
-    flex-direction: column;
-    margin-top: 3%;
-    width: 74%;
-    height: 40%;
-    background-color: #f4efe8;
-    border-radius: 40px;
-    padding: 4%;
-    box-shadow: 0px 25px 80px rgba(0, 0, 0, 0.15);
+.header {
+  display: flex;
+  align-items: center;
+  font-size: 23px;
+  font-weight: 700;
+  height: 8%;
+  width: 100%;
+  background-color: #fcfaf8;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 8px;
+  position: sticky;
+  top: 0;
+  z-index: 99;
 }
 
-.hero p{
-    font-size: 22px;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 500;
-    margin-right: 35%;
+.logo {
+  height: 60px;
+  width: 60px;
+  padding-left: 1%;
+  padding-right: 0.5%;
+}
+.hero {
+  display: flex;
+  font-family: "Poppins", sans-serif;
+  flex-direction: column;
+  margin-top: 3%;
+  width: 74%;
+  height: 40%;
+  background-color: #f4efe8;
+  border-radius: 40px;
+  padding: 4%;
+  box-shadow: 0px 25px 80px rgba(0, 0, 0, 0.15);
 }
 
-.hero h2{
-    font-size: 40px;
+.hero p {
+  font-size: 22px;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 500;
+  margin-right: 35%;
 }
 
-.next{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 50px;
-    margin-top: 3%;
+.hero h2 {
+  font-size: 40px;
 }
 
-.nextButton{
-    transition: all .5s ease;
-    height: 85%;
-    width: 10%;
-    color: #000;
-    background-color: #F19006;
-    font-size: 18px;
-    letter-spacing: 0.5px;
-    font-weight: 500;
-    border-radius: 20px;
-    border-style: none;
-    cursor: pointer;
-    display: 'flex'; 
-    justify-content: center;
-    align-items: center;
-    font-family: 'Poppins',sans-serif;
+.next {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 50px;
+  margin-top: 3%;
 }
 
-.nextButton:hover{
-    color:#FFF ;
-    background-color:#000 ;
+.nextButton {
+  transition: all 0.5s ease;
+  height: 85%;
+  width: 10%;
+  color: #000;
+  background-color: #f19006;
+  font-size: 18px;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+  border-radius: 20px;
+  border-style: none;
+  cursor: pointer;
+  display: "flex";
+  justify-content: center;
+  align-items: center;
+  font-family: "Poppins", sans-serif;
 }
 
-.info{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: row;
-    width: 80%;
-    height: 500px;
-    margin-bottom: 2%;
-    gap: 4%;
-    padding: 2%;
-    margin-top: 4%;
+.nextButton:hover {
+  color: #fff;
+  background-color: #000;
 }
 
-.users{
-display: flex;
-flex-direction: column;
-width: 50%;
-height: 90%;
-padding: 4%;
-border-radius: 40px;
-background-color: #FCFAF8;
-border: 3px solid #CBB89E;
-box-shadow: 0px 25px 80px rgba(0, 0, 0, 0.15);
+.info {
+  display: flex;
+  font-family: "Poppins", sans-serif;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  width: 80%;
+  height: 500px;
+  margin-bottom: 2%;
+  gap: 4%;
+  padding: 2%;
+  margin-top: 4%;
 }
 
-
-.info p{
-    font-size: 22px;
-    color: #9D7947;
-    font-family: 'Montserrat', sans-serif;
+.users {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  height: 90%;
+  padding: 4%;
+  border-radius: 40px;
+  background-color: #fcfaf8;
+  border: 3px solid #cbb89e;
+  box-shadow: 0px 25px 80px rgba(0, 0, 0, 0.15);
 }
 
-.Button{
-    transition: all .5s ease;
-    padding-top: 3%;
-    height: 10%;
-    width: 30%;
-    background-color:#F19006 ;
-    font-size: 19px;
-    font-weight: 500;
-    border-radius: 20px;
-    border-style: none;
-    cursor: pointer;
-    display: 'flex'; 
-    justify-content: center;
-    align-items: center;
-    font-family: 'Poppins',sans-serif;
-    text-align: center;
-    text-decoration: none;
-    color: #000;
+.info p {
+  font-size: 22px;
+  color: #9d7947;
+  font-family: "Montserrat", sans-serif;
+}
+
+.Button {
+  transition: all 0.5s ease;
+  padding-top: 3%;
+  height: 10%;
+  width: 30%;
+  background-color: #f19006;
+  font-size: 19px;
+  font-weight: 500;
+  border-radius: 20px;
+  border-style: none;
+  cursor: pointer;
+  display: "flex";
+  justify-content: center;
+  align-items: center;
+  font-family: "Poppins", sans-serif;
+  text-align: center;
+  text-decoration: none;
+  color: #000;
 }
 
 .Button:hover {
-      color:#FCFAF8 ;
-    background-color:#000 ;
+  color: #fcfaf8;
+  background-color: #000;
 }
-
-
