@@ -3,6 +3,7 @@ import { useHistory } from "react-router-dom";
 import "../Styles/BookingModal.css";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { motion } from "framer-motion";
 import axios from "axios";
 
 function BookingModal(props) {
@@ -75,7 +76,12 @@ function BookingModal(props) {
 
   return (
     <div ref={modalRef} onClick={closeModal} className="modalContainer">
-      <div className="modalBox">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ type: "just", duration: 0.2 }}
+        className="modalBox"
+      >
         <h1>Confirm booking</h1>
         <h2 style={{ fontWeight: "500" }}>
           Please enter your password to confirm booking
@@ -119,7 +125,7 @@ function BookingModal(props) {
             Confirm
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

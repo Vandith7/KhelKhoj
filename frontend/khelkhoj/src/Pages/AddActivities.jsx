@@ -147,6 +147,11 @@ function AddActivities() {
         <div className="nav-links">
           <ul className="ulLink">
             <li>
+              <Link to="/welcomeClub" className="links">
+                Home
+              </Link>
+            </li>
+            <li>
               <Link to="/" className="links">
                 <img
                   className="userProfile"

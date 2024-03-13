@@ -229,7 +229,7 @@ router.get('/activities', (req, res) => {
         a.contact_information
     FROM activities AS a
     INNER JOIN clubs AS c ON a.club_id = c.club_id
-    WHERE a.end_date > '${currentDate}'`; // Filter activities with end date later than today
+    WHERE a.end_date > '${currentDate}' AND a.visibility = 1`; // Filter activities with end date later than today
 
     db.query(sql, (err, results) => {
         if (err) {
@@ -317,6 +317,7 @@ router.get('/activities/:activityId', (req, res) => {
         a.photo3,
         a.photo4,
         c.name AS club_name,
+        c.address,
         c.description AS club_description
     FROM activities AS a
     INNER JOIN clubs AS c ON a.club_id = c.club_id
@@ -451,7 +452,7 @@ router.get('/getBookings', verifyUser, (req, res) => {
                  FROM bookings AS b
                  INNER JOIN grounds AS g ON b.ground_id = g.ground_id
                  INNER JOIN clubs AS c ON g.club_id = c.club_id
-                 WHERE b.user_id = ? AND b.date >= ?`;
+                 WHERE b.user_id = ? `;
 
     db.query(sql, [user_id, currentDate], (err, results) => {
         if (err) {
@@ -620,6 +621,30 @@ function updateName(name, userId, profile_photo, res) {
         });
     });
 }
+
+// Activity Enquiry Route
+router.post('/activities/:activityId/enquiry', verifyUser, (req, res) => {
+    const { activityId } = req.params;
+    const userId = req.userData.user_id;
+    const { inquiry_message } = req.body;
+    const { contact_info } = req.body;
+
+    // Validate required fields
+    if (!inquiry_message || !contact_info) {
+        return res.status(400).json({ error: "Contact information and question are required" });
+    }
+
+    // Store the activity enquiry in the database
+    const insertEnquiryQuery = 'INSERT INTO activity_inquiries (activity_id, user_id,inquiry_message,contact_info) VALUES (?, ?, ?,?)';
+    db.query(insertEnquiryQuery, [activityId, userId, inquiry_message, contact_info], (err, result) => {
+        if (err) {
+            console.error("Error storing activity enquiry:", err);
+            return res.status(500).json({ error: "Internal Server Error" });
+        }
+        return res.json({ status: "Success", message: "Activity enquiry submitted successfully" });
+    });
+});
+
 
 
 

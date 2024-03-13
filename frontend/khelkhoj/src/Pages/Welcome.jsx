@@ -1,4 +1,5 @@
-import React, { useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 import "../Styles/Welcome.css";
 import logo from "../assets/KhelKhojLogo.png";
 import boy from "../assets/Boy.webp";
@@ -11,7 +12,29 @@ import {
 import { Link } from "react-router-dom";
 
 function Welcome() {
+  const [showInfo, setShowInfo] = useState(false);
   const infoRef = useRef(null);
+  const [animationTriggered, setAnimationTriggered] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!animationTriggered && infoRef.current) {
+        const top = infoRef.current.getBoundingClientRect().top;
+        const windowHeight = window.innerHeight;
+        if (top < windowHeight) {
+          setShowInfo(true);
+          setAnimationTriggered(true);
+          window.removeEventListener("scroll", handleScroll);
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [animationTriggered]);
 
   const scrollToInfo = () => {
     infoRef.current.scrollIntoView({ behavior: "smooth" });
@@ -19,7 +42,12 @@ function Welcome() {
 
   return (
     <div className="container">
-      <div className="header">
+      <motion.div
+        className="header"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+      >
         <img className="logo" src={logo} alt="Khel-Khoj" />
         <p
           style={{
@@ -30,8 +58,8 @@ function Welcome() {
         >
           Khel-Khoj
         </p>
-      </div>
-      <div
+      </motion.div>
+      <motion.div
         className="hero"
         style={{
           backgroundImage: `url(${boy})`,
@@ -39,6 +67,9 @@ function Welcome() {
           backgroundRepeat: "no-repeat",
           backgroundSize: "contain",
         }}
+        initial={{ opacity: 0, x: -100 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.8 }}
       >
         <h1 style={{ fontSize: "50px", fontWeight: 800 }}>
           Welcome to{" "}
@@ -59,8 +90,13 @@ function Welcome() {
           athlete seeking the perfect venue or an avid enthusiast looking for
           your next adventure, Khel-khoj is here to empower your journey!
         </p>
-      </div>
-      <div className="next">
+      </motion.div>
+      <motion.div
+        className="next"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1 }}
+      >
         <button className="nextButton" onClick={scrollToInfo}>
           See more{" "}
           <FontAwesomeIcon
@@ -68,9 +104,14 @@ function Welcome() {
             icon={faAnglesDown}
           />{" "}
         </button>
-      </div>
-      <div ref={infoRef} className="info">
-        <div className="users">
+      </motion.div>
+      <div ref={infoRef} className={`info ${showInfo ? "visible" : ""}`}>
+        <motion.div
+          className="users"
+          initial={{ opacity: 0, y: 50 }}
+          animate={showInfo ? { opacity: 1, y: 0 } : {}}
+          transition={{ delay: 0.5 }}
+        >
           <h2>Discover, Book, and Play</h2>
           <p>
             Embark on a journey of discovery with Khel-khoj. Our user-friendly
@@ -89,8 +130,13 @@ function Welcome() {
               />
             </span>
           </Link>
-        </div>
-        <div className="users">
+        </motion.div>
+        <motion.div
+          className="users"
+          initial={{ opacity: 0, y: 50 }}
+          animate={showInfo ? { opacity: 1, y: 0 } : {}}
+          transition={{ delay: 0.7 }}
+        >
           <h2>Unleash Potential of Your Venue</h2>
           <p>
             Khel-khoj provides clubs with a powerful platform to showcase their
@@ -109,7 +155,7 @@ function Welcome() {
               />
             </span>
           </Link>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

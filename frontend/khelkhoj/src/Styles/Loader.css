@@ -1,0 +1,42 @@
+/* Loader.css */
+
+.loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 600px; /* Adjust height as needed */
+}
+
+.loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100px;
+  height: 100px;
+}
+
+.ball {
+  width: 20px;
+  height: 20px;
+  background-color: #f19006; /* Blue color, you can adjust */
+  border-radius: 50%;
+  margin: 0 5px;
+  animation: bounce 0.8s infinite alternate;
+}
+
+@keyframes bounce {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-20px);
+  }
+}
+
+.ball:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.ball:nth-child(3) {
+  animation-delay: 0.2s;
+}

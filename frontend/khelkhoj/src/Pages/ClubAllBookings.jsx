@@ -3,6 +3,7 @@ import "../Styles/WelcomeUser.css";
 import { Link } from "react-router-dom";
 import logo from "../assets/KhelKhojLogo.png";
 import "../Styles/AllBookings.css";
+import { motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCalendarDay,
@@ -87,7 +88,11 @@ function ClubAllBookings() {
         <div className="groundBookingContainer">
           {upcomingBookings && upcomingBookings.length > 0 ? (
             upcomingBookings.map((upcomingBooking) => (
-              <div
+              <motion.div
+                whileTap={{ scale: 0.9 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
                 to={`/bookingDetails/${upcomingBooking.booking_id}`}
                 //   className="cardsLeft"
                 className="allBookingCards"
@@ -121,7 +126,7 @@ function ClubAllBookings() {
                     upcomingBooking.booking_end_time.slice(0, 5)
                   )}
                 </p>
-              </div>
+              </motion.div>
             ))
           ) : (
             // <div className="allBookingContainer">
@@ -139,7 +144,11 @@ function ClubAllBookings() {
         <div className="groundBookingContainer">
           {pastBookings && pastBookings.length > 0 ? (
             pastBookings.map((pastBooking) => (
-              <div
+              <motion.div
+                whileTap={{ scale: 0.9 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
                 to={`/bookingDetails/${pastBooking.booking_id}`}
                 //   className="cardsLeft"
                 className="allBookingCards"
@@ -173,7 +182,7 @@ function ClubAllBookings() {
                     pastBooking.booking_end_time.slice(0, 5)
                   )}
                 </p>
-              </div>
+              </motion.div>
             ))
           ) : (
             <div className="allBookingContainer">

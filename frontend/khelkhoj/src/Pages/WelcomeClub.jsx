@@ -5,6 +5,7 @@ import { Link, useHistory } from "react-router-dom";
 import logo from "../assets/KhelKhojLogo.png";
 import defaultDp from "../assets/user.jpg";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { motion } from "framer-motion";
 import {
   faCalendarDays,
   faRightFromBracket,
@@ -158,7 +159,12 @@ function WelcomeClub() {
         </div>
       </div>
       <div className="main">
-        <div className="leftBar">
+        <motion.div
+          initial={{ opacity: 0, x: -100 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1 }}
+          className="leftBar"
+        >
           <h2 style={{ color: "black" }}>
             <FontAwesomeIcon
               style={{ fontSize: 24, marginRight: "5%" }}
@@ -260,76 +266,90 @@ function WelcomeClub() {
               See all
             </Link>
           </ul>
-        </div>
+        </motion.div>
         <div className="rightBar">
-          <div className="greetContainer">
+          <motion.div
+            className="greetContainer"
+            initial={{ y: -100 }}
+            animate={{ y: 0 }}
+            transition={{ type: "tween", stiffness: 120 }}
+          >
             <ClubGreetings name={name} />
-          </div>
+          </motion.div>
           <div className="addGroundAndActivities">
             {grounds.length > 0 ? (
               <div className="groundsClubContainer">
                 <h1 style={{ color: "#F99810" }}> Your Grounds </h1>
                 <div>
                   {grounds.map((ground) => (
-                    <Link
-                      to={`/clubGroundDetails/${ground.ground_id}`}
-                      key={ground.ground_id}
+                    <motion.div
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.9 }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
                       className="groundClubCard"
+                      transition={{ duration: 0.5 }}
                     >
-                      {ground.photo1 && (
-                        <img
-                          className="groundClubPic"
-                          src={ground.photo1}
-                          alt="Ground"
-                        />
-                      )}
-                      <h3 style={{ marginLeft: "2%", color: "#F99810" }}>
-                        <FontAwesomeIcon
-                          style={{ fontSize: 15, marginRight: "2%" }}
-                          icon={faFlag}
-                        />
-                        Ground Type: {ground.type}
-                      </h3>
-                      <p>
-                        <FontAwesomeIcon
-                          style={{ fontSize: 15, marginRight: "2%" }}
-                          icon={faEye}
-                        />
-                        Booking Availability:{" "}
-                        {ground.visibility === 1
-                          ? "(Open for booking)"
-                          : "(Not available for booking)"}
-                      </p>
-                      <p>
-                        <FontAwesomeIcon
-                          style={{ fontSize: 15, marginRight: "2%" }}
-                          icon={faCircleInfo}
-                        />
-                        Details: {ground.description}
-                      </p>
+                      <Link
+                        style={{ color: "black", textDecoration: "none" }}
+                        to={`/clubGroundDetails/${ground.ground_id}`}
+                        key={ground.ground_id}
+                      >
+                        {ground.photo1 && (
+                          <img
+                            className="groundClubPic"
+                            src={ground.photo1}
+                            alt="Ground"
+                          />
+                        )}
+                        <h3 style={{ marginLeft: "2%", color: "#F99810" }}>
+                          <FontAwesomeIcon
+                            style={{ fontSize: 15, marginRight: "2%" }}
+                            icon={faFlag}
+                          />
+                          Ground Type: {ground.type}
+                        </h3>
+                        <p>
+                          <FontAwesomeIcon
+                            style={{ fontSize: 15, marginRight: "2%" }}
+                            icon={faEye}
+                          />
+                          Booking Availability:{" "}
+                          {ground.visibility === 1
+                            ? "(Open for booking)"
+                            : "(Not available for booking)"}
+                        </p>
+                        <p>
+                          <FontAwesomeIcon
+                            style={{ fontSize: 15, marginRight: "2%" }}
+                            icon={faCircleInfo}
+                          />
+                          Details: {ground.description}
+                        </p>
 
-                      <p>
-                        <FontAwesomeIcon
-                          style={{ fontSize: 15, marginRight: "2%" }}
-                          icon={faHourglassStart}
-                        />
-                        Opens at {ground.start_time}
-                      </p>
-                      <p>
-                        <FontAwesomeIcon
-                          style={{ fontSize: 15, marginRight: "2%" }}
-                          icon={faHourglassEnd}
-                        />
-                        Closes at {ground.end_time}
-                      </p>
-                      <p>
-                        <FontAwesomeIcon
-                          style={{ fontSize: 15, marginRight: "2%" }}
-                          icon={faIndianRupeeSign}
-                        />
-                        Price: {ground.price}
-                      </p>
-                    </Link>
+                        <p>
+                          <FontAwesomeIcon
+                            style={{ fontSize: 15, marginRight: "2%" }}
+                            icon={faHourglassStart}
+                          />
+                          Opens at {ground.start_time}
+                        </p>
+                        <p>
+                          <FontAwesomeIcon
+                            style={{ fontSize: 15, marginRight: "2%" }}
+                            icon={faHourglassEnd}
+                          />
+                          Closes at {ground.end_time}
+                        </p>
+                        <p>
+                          <FontAwesomeIcon
+                            style={{ fontSize: 15, marginRight: "2%" }}
+                            icon={faIndianRupeeSign}
+                          />
+                          Price: {ground.price}
+                        </p>
+                      </Link>
+                    </motion.div>
                   ))}
                 </div>
                 <div>
@@ -360,78 +380,108 @@ function WelcomeClub() {
                 <h1 style={{ color: "#F99810" }}> Your Activities </h1>
                 <div>
                   {activities.map((activity) => (
-                    <li key={activity.activity_id} className="groundClubCard">
-                      {activity.photo1 && (
-                        <img
-                          className="groundClubPic"
-                          src={activity.photo1}
-                          alt="Ground"
-                        />
-                      )}
-                      <h3 style={{ marginLeft: "2%", color: "#F99810" }}>
-                        <FontAwesomeIcon
-                          style={{ fontSize: 15, marginRight: "2%" }}
-                          icon={faFlag}
-                        />
-                        Name: {activity.activity_name}
-                      </h3>
-                      <p>
-                        <FontAwesomeIcon
-                          style={{ fontSize: 15, marginRight: "2%" }}
-                          icon={faFireFlameCurved}
-                        />
-                        Activity: {activity.category}
-                      </p>
-                      <p>
-                        <FontAwesomeIcon
-                          style={{ fontSize: 15, marginRight: "2%" }}
-                          icon={faCircleInfo}
-                        />
-                        Details: {activity.description}
-                      </p>
-                      <p>
-                        <FontAwesomeIcon
-                          style={{ fontSize: 15, marginRight: "2%" }}
-                          icon={faPeopleGroup}
-                        />
-                        Age group: {activity.age_group}
-                      </p>
-                      <p>
-                        <FontAwesomeIcon
-                          style={{ fontSize: 15, marginRight: "2%" }}
-                          icon={faCalendar}
-                        />
-                        From {activity.start_date} to {activity.end_date}
-                      </p>
-                      <p>
-                        <FontAwesomeIcon
-                          style={{ fontSize: 15, marginRight: "2%" }}
-                          icon={faClock}
-                        />
-                        Timings: {activity.start_time} to {activity.end_time}
-                      </p>
-                      <p>
-                        <FontAwesomeIcon
-                          style={{ fontSize: 15, marginRight: "2%" }}
-                          icon={faTicketAlt}
-                        />
-                        Entries: {activity.capacity}
-                      </p>
-                      <p>
-                        <FontAwesomeIcon
-                          style={{ fontSize: 15, marginRight: "2%" }}
-                          icon={faIndianRupeeSign}
-                        />
-                        Price: {activity.price}/person
-                      </p>
-                      <p>
-                        <FontAwesomeIcon
-                          style={{ fontSize: 15, marginRight: "2%" }}
-                          icon={faIdCard}
-                        />
-                        Contact details: {activity.contact_information}
-                      </p>
-                    </li>
+                    <motion.div
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.9 }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      {" "}
+                      <Link
+                        style={{ color: "black", textDecoration: "none" }}
+                        to={`/clubActivityDetails/${activity.activity_id}`}
+                        key={activity.activity_id}
+                      >
+                        <li
+                          key={activity.activity_id}
+                          className="groundClubCard"
+                        >
+                          {activity.photo1 && (
+                            <img
+                              className="groundClubPic"
+                              src={activity.photo1}
+                              alt="Ground"
+                            />
+                          )}
+
+                          <h3 style={{ marginLeft: "2%", color: "#F99810" }}>
+                            <FontAwesomeIcon
+                              style={{ fontSize: 15, marginRight: "2%" }}
+                              icon={faFlag}
+                            />
+                            Name: {activity.activity_name}
+                          </h3>
+                          <p>
+                            <FontAwesomeIcon
+                              style={{ fontSize: 15, marginRight: "2%" }}
+                              icon={faEye}
+                            />
+                            Activty Availability:{" "}
+                            {activity.visibility === 1
+                              ? "(Open for enquiry)"
+                              : "(Not visible to users)"}
+                          </p>
+                          <p>
+                            <FontAwesomeIcon
+                              style={{ fontSize: 15, marginRight: "2%" }}
+                              icon={faFireFlameCurved}
+                            />
+                            Activity: {activity.category}
+                          </p>
+                          <p>
+                            <FontAwesomeIcon
+                              style={{ fontSize: 15, marginRight: "2%" }}
+                              icon={faCircleInfo}
+                            />
+                            Details: {activity.description}
+                          </p>
+                          <p>
+                            <FontAwesomeIcon
+                              style={{ fontSize: 15, marginRight: "2%" }}
+                              icon={faPeopleGroup}
+                            />
+                            Age group: {activity.age_group}
+                          </p>
+                          <p>
+                            <FontAwesomeIcon
+                              style={{ fontSize: 15, marginRight: "2%" }}
+                              icon={faCalendar}
+                            />
+                            From {activity.start_date} to {activity.end_date}
+                          </p>
+                          <p>
+                            <FontAwesomeIcon
+                              style={{ fontSize: 15, marginRight: "2%" }}
+                              icon={faClock}
+                            />
+                            Timings: {activity.start_time} to{" "}
+                            {activity.end_time}
+                          </p>
+                          <p>
+                            <FontAwesomeIcon
+                              style={{ fontSize: 15, marginRight: "2%" }}
+                              icon={faTicketAlt}
+                            />
+                            Entries: {activity.capacity}
+                          </p>
+                          <p>
+                            <FontAwesomeIcon
+                              style={{ fontSize: 15, marginRight: "2%" }}
+                              icon={faIndianRupeeSign}
+                            />
+                            Price: {activity.price}/person
+                          </p>
+                          <p>
+                            <FontAwesomeIcon
+                              style={{ fontSize: 15, marginRight: "2%" }}
+                              icon={faIdCard}
+                            />
+                            Contact details: {activity.contact_information}
+                          </p>
+                        </li>
+                      </Link>
+                    </motion.div>
                   ))}
                 </div>
                 <div>

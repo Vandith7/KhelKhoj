@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { motion } from "framer-motion"; // Import motion from framer-motion
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCamera, faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 
@@ -52,15 +53,18 @@ function MultipleImage(props) {
 
       <div className="groundClubImageContainer">
         {imageBlobs.map((imageBlob, index) => (
-          <div
+          <motion.div
             key={index}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
             style={{
               position: "relative",
               display: "inline-block",
               marginRight: 10,
             }}
           >
-            <img
+            <motion.img
               src={imageBlob}
               alt="Selected"
               style={{
@@ -71,6 +75,7 @@ function MultipleImage(props) {
                 height: "120px",
                 borderRadius: "10px",
               }}
+              whileHover={{ scale: 1.04 }} // Scale up on hover
             />
             <FontAwesomeIcon
               icon={faTimesCircle}
@@ -83,7 +88,7 @@ function MultipleImage(props) {
               }}
               onClick={() => handleDeleteImage(index)}
             />
-          </div>
+          </motion.div>
         ))}
         {/* Conditional rendering of "Add more" button */}
         {imageBlobs.length >= 1 && imageBlobs.length < 4 && (

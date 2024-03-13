@@ -7,6 +7,7 @@ import {
   faChevronLeft,
   faChevronRight,
   faCircleInfo,
+  faCircleQuestion,
   faClock,
   faFireFlameCurved,
   faFlag,
@@ -25,10 +26,11 @@ import defaultGroundPic from "../assets/defaultGround.webp";
 import "../Styles/GroundDetails.css";
 import ActivityModal from "../Components/ActivityModal";
 
-function ActivityDetails() {
+function ClubActivityDetails() {
   const [ground, setGround] = useState(null);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [userId, setUserId] = useState("");
+  const [inquiries, setInquiries] = useState(null);
   const [showModal, setShowmodal] = useState(false);
   let { activityId } = useParams();
   const handleEnquireNow = () => {
@@ -51,6 +53,19 @@ function ActivityDetails() {
       }
     });
   }, [userId]);
+
+  useEffect(() => {
+    axios
+      .get(`http://localhost:3001/club/inquiries/${activityId}`)
+      .then((res) => {
+        if (res.data.status === "Success") {
+          setInquiries(res.data.inquiries);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching inquiries:", error);
+      });
+  }, [activityId]);
 
   const nextPhoto = () => {
     setCurrentPhotoIndex(
@@ -80,6 +95,54 @@ function ActivityDetails() {
     const hour12 = hourInt % 12 || 12;
     return `${hour12}:${minute} ${suffix}`;
   }
+  const sortInquiriesByStatus = (inquiries) => {
+    // Define the order of statuses
+    const statusOrder = ["pending", "not_answered", "answered"];
+
+    // Sort inquiries by status, using the defined order
+    inquiries.sort((a, b) => {
+      const statusIndexA = statusOrder.indexOf(a.status);
+      const statusIndexB = statusOrder.indexOf(b.status);
+
+      // Compare the indexes of statuses in the statusOrder array
+      if (statusIndexA < statusIndexB) {
+        return -1;
+      } else if (statusIndexA > statusIndexB) {
+        return 1;
+      } else {
+        // If statuses are the same, maintain the original order
+        return 0;
+      }
+    });
+
+    return inquiries; // Return the sorted array
+  };
+
+  const handleStatusChange = (inquiryId, newStatus) => {
+    // Send a POST request to update the status
+    axios
+      .post(`http://localhost:3001/club/updateInquiryStatus/${inquiryId}`, {
+        status: newStatus,
+      })
+      .then((res) => {
+        if (res.data.status === "Success") {
+          axios
+            .get(`http://localhost:3001/club/inquiries/${activityId}`)
+            .then((res) => {
+              if (res.data.status === "Success") {
+                setInquiries(res.data.inquiries);
+              }
+            })
+            .catch((error) => {
+              console.error("Error fetching inquiries:", error);
+            });
+        }
+      })
+      .catch((error) => {
+        console.error("Error updating status:", error);
+        // Handle error if status update fails
+      });
+  };
 
   if (!ground) {
     return <div>Loading...</div>;
@@ -102,7 +165,7 @@ function ActivityDetails() {
         </Link>
         <div className="nav-links">
           <ul className="ulLink">
-            <Link to="/welcomeUser" className="links">
+            <Link to="/welcomeClub" className="links">
               Home
             </Link>
           </ul>
@@ -181,15 +244,11 @@ function ActivityDetails() {
             </h3>
             <p className="groundDetDesc">
               <FontAwesomeIcon icon={faIndianRupeeSign} />{" "}
-              {Math.floor(ground.price)}/person
+              {Math.floor(ground.price)}/hour
             </p>
 
             <p className="groundDetPrice"></p>
             <p className="groundDetDesc">{ground.description}</p>
-            <h3>
-              <FontAwesomeIcon icon={faUsers} /> About {ground.club_name}:
-            </h3>
-            <p className="groundDetDesc">{ground.club_description}</p>
           </div>
         </div>
         <div className="rightGroundDetContainer">
@@ -205,27 +264,6 @@ function ActivityDetails() {
                 <FontAwesomeIcon icon={faClock} /> Timings :{" "}
               </span>
               {formatTime(ground.start_time)} to {formatTime(ground.end_time)}
-            </h3>
-            <h3>
-              {" "}
-              <FontAwesomeIcon icon={faMapLocationDot} /> Address :{" "}
-              {ground.address ? (
-                ground.address.startsWith("https://") &&
-                ground.address.includes("maps") ? (
-                  <a
-                    className="groundAddress"
-                    href={ground.address}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    View on Google Maps
-                  </a>
-                ) : (
-                  <p className="groundAddress2">{ground.address}</p>
-                )
-              ) : (
-                <p className="groundAddress2">No address available</p>
-              )}
             </h3>
           </div>
           <div className="bookNowContainer">
@@ -247,8 +285,63 @@ function ActivityDetails() {
               </span>
               {ground.contact_information}
             </p>
-            <div className="bookNowButton">
-              <p onClick={handleEnquireNow}>Enquire now</p>
+            <Link
+              to={`/updateActivity/${ground.activity_id}`}
+              className="updateActivityNowButton"
+            >
+              <p>Update activity</p>
+            </Link>
+          </div>
+          <div className="EnquiryClubContainer">
+            <h1 style={{ fontSize: "30px" }}>
+              <span style={{ fontWeight: "600" }}>
+                <FontAwesomeIcon icon={faCircleQuestion} /> Enquiries:{" "}
+              </span>
+            </h1>
+            <div className="scrollableEnquiry">
+              <div className="enquiriesClub">
+                {inquiries && inquiries.length > 0 ? (
+                  sortInquiriesByStatus(inquiries).map((inquiry) => (
+                    <div key={inquiry.inquiry_id} className="inquiryItem">
+                      <p>
+                        <span style={{ fontWeight: "600" }}>Username:</span>{" "}
+                        {inquiry.user_name}
+                      </p>
+                      <p>
+                        <span style={{ fontWeight: "600" }}>Query:</span>{" "}
+                        {inquiry.inquiry_message}
+                      </p>
+                      <p>
+                        <span style={{ fontWeight: "600" }}>Contact Info:</span>{" "}
+                        {inquiry.contact_info}
+                      </p>
+                      <p>
+                        <span style={{ fontWeight: "600" }}>Status:</span>{" "}
+                        {inquiry.status === "pending"
+                          ? `Contact pending by ${ground.club_name}`
+                          : inquiry.status === "not_answered"
+                          ? `${inquiry.user_name} didn't respond`
+                          : inquiry.status === "answered"
+                          ? `${inquiry.user_name}'s enquiry answered`
+                          : ""}
+                      </p>
+                      <select
+                        value={inquiry.status}
+                        onChange={(e) =>
+                          handleStatusChange(inquiry.inquiry_id, e.target.value)
+                        }
+                        className="enquiryStatusUpdate"
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="not_answered">Not Answered</option>
+                        <option value="answered">Answered</option>
+                      </select>
+                    </div>
+                  ))
+                ) : (
+                  <h2>No enquiries yet.</h2>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -257,4 +350,4 @@ function ActivityDetails() {
   );
 }
 
-export default ActivityDetails;
+export default ClubActivityDetails;

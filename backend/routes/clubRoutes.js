@@ -241,7 +241,8 @@ router.get('/activities/:clubId', (req, res) => {
         a.photo2,
         a.photo3,
         a.photo4,
-        a.contact_information
+        a.contact_information,
+        a.visibility
     FROM activities AS a
     WHERE a.club_id = ?`;
 
@@ -273,7 +274,7 @@ router.get('/bookings', verifyClub, (req, res) => {
                  INNER JOIN grounds AS g ON b.ground_id = g.ground_id
                  INNER JOIN clubs AS c ON g.club_id = c.club_id
                  INNER JOIN users AS u ON b.user_id = u.user_id
-                 WHERE g.club_id = ? AND b.date >= ?`;
+                 WHERE g.club_id = ? `;
 
     db.query(sql, [club_id, currentDate], (err, results) => {
         if (err) {
@@ -346,6 +347,73 @@ router.post('/updateGround', verifyClub, upload.array('photos', 4), (req, res) =
     });
 });
 
+router.post('/updateActivity', verifyClub, upload.array('photos', 4), (req, res) => {
+    const activityId = req.body.activity_id;
+    const { contact_information, description, start_time, end_time, age_group, start_date, end_date, price, visibility } = req.body;
+    const photos = req.body.photos; // Get paths of uploaded photos
+
+    // Initialize arrays to hold values and update queries
+    const updateValues = [];
+    const updateQueries = [];
+
+    // Build update queries and values for each field that is provided
+
+    if (description) {
+        updateQueries.push("description = ?");
+        updateValues.push(description);
+    }
+    if (contact_information) {
+        updateQueries.push("contact_information = ?");
+        updateValues.push(contact_information);
+    }
+    if (age_group) {
+        updateQueries.push("age_group = ?");
+        updateValues.push(age_group);
+    }
+    if (start_date) {
+        updateQueries.push("start_date = ?");
+        updateValues.push(start_date);
+    }
+    if (end_date) {
+        updateQueries.push("end_date = ?");
+        updateValues.push(end_date);
+    }
+    if (start_time) {
+        updateQueries.push("start_time = ?");
+        updateValues.push(start_time);
+    }
+    if (end_time) {
+        updateQueries.push("end_time = ?");
+        updateValues.push(end_time);
+    }
+    if (price) {
+        updateQueries.push("price = ?");
+        updateValues.push(price);
+    }
+    if (visibility) {
+        updateQueries.push("visibility = ?");
+        updateValues.push(visibility);
+    }
+    if (photos && photos.length > 0) {
+        // If photos are provided, update photo paths
+        for (let i = 0; i < photos.length; i++) {
+            updateQueries.push(`photo${i + 1} = ?`);
+            updateValues.push(photos[i]);
+        }
+    }
+
+    // Construct the SQL update query
+    let sql = "UPDATE activities SET " + updateQueries.join(', ') + " WHERE activity_id = ?";
+    updateValues.push(activityId);
+    db.query(sql, updateValues, (updateErr, updateResult) => {
+        if (updateErr) {
+            console.log(updateErr)
+            return res.status(500).json({ error: "Error updating ground details" });
+        }
+
+        return res.json({ status: "Success", message: "Ground details updated successfully" });
+    });
+});
 
 router.post('/checkCredentials', (req, res) => {
     const { userId, password } = req.body;
@@ -421,5 +489,45 @@ router.post('/grounds/:groundId', verifyClub, (req, res) => {
     });
 });
 
+router.get('/inquiries/:activityId', (req, res) => {
+    const activityId = req.params.activityId;
+
+    const sql = `
+        SELECT activity_inquiries.*, users.name AS user_name
+        FROM activity_inquiries
+        INNER JOIN users ON activity_inquiries.user_id = users.user_id
+        WHERE activity_inquiries.activity_id = ?`;
+
+    db.query(sql, [activityId], (err, results) => {
+        if (err) {
+            console.error("Error fetching inquiries:", err);
+            return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+        }
+
+        res.json({ status: "Success", inquiries: results });
+    });
+});
+
+
+router.post('/updateInquiryStatus/:inquiryId', (req, res) => {
+    const inquiryId = req.params.inquiryId;
+    const { status } = req.body;
+
+
+    // Update the status of the inquiry in the database
+    const updateQuery = 'UPDATE activity_inquiries SET status = ? WHERE inquiry_id = ?';
+    db.query(updateQuery, [status, inquiryId], (err, result) => {
+        if (err) {
+            console.error("Error updating inquiry status:", err);
+            return res.status(500).json({ error: "Internal Server Error" });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "Inquiry not found" });
+        }
+
+        return res.json({ status: "Success", message: "Inquiry status updated successfully" });
+    });
+});
 
 module.exports = router;

@@ -18,6 +18,8 @@ import ClubAllBookings from './Pages/ClubAllBookings';
 import UpdateUser from './Pages/UpdateUser';
 import UpdateGround from './Pages/UpdateGround';
 import ClubGroundDetails from './Pages/ClubGroundDetails';
+import ClubActivityDetails from './Pages/ClubActivityDetails';
+import UpdateActivity from './Pages/UpdateActivity';
 
 function App() {
   return (
@@ -42,7 +44,9 @@ function App() {
         <Route path="/clubAllBookings" component={ClubAllBookings} />
         <Route path="/updateUser" component={UpdateUser} />
         <Route path="/updateGround/:groundId" component={UpdateGround} />
+        <Route path="/updateActivity/:activityId" component={UpdateActivity} />
         <Route path="/clubGroundDetails/:groundId" component={ClubGroundDetails} />
+        <Route path="/clubActivityDetails/:activityId" component={ClubActivityDetails} />
       </Switch>
 
     </Router>

@@ -1,0 +1,18 @@
+.passwordInputContainerActivity {
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+}
+
+.modalBoxActivity {
+  font-family: "Poppins", sans-serif;
+  height: 400px;
+  border-radius: 10px;
+  background-color: #fcfaf8;
+  padding: 2%;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 8px;
+}
+
+.successEnquiry {
+  color: #000;
+}

@@ -6,6 +6,7 @@ import defaultDp from "../assets/user.jpg";
 import defaultGroundPic from "../assets/defaultGround.webp";
 import notFound from "../assets/not-found.webp";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { motion } from "framer-motion";
 import {
   faCalendarDays,
   faLocationDot,
@@ -282,7 +283,12 @@ function WelcomeUser() {
         </div>
       </div>
       <div className="main">
-        <div className="leftBar">
+        <motion.div
+          initial={{ opacity: 0, x: -100 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1 }}
+          className="leftBar"
+        >
           <h2 style={{ color: "#000" }}>
             <FontAwesomeIcon
               style={{ fontSize: 24, marginRight: "5%", color: "#000" }}
@@ -327,46 +333,55 @@ function WelcomeUser() {
                     }
                   })
                   .map((booking) => (
-                    <Link
-                      to={`/bookingDetails/${booking.booking_id}`}
+                    <motion.div
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.9 }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.5 }}
                       className="cardsLeft"
-                      key={booking.booking_id}
                     >
-                      <h2 className="venueLeft">
-                        <FontAwesomeIcon
-                          style={{ fontSize: 18, marginRight: "2%" }}
-                          icon={faLocationDot}
-                        />
-                        {booking.club_name}
-                      </h2>
-                      <p className="activityLeft">
-                        <FontAwesomeIcon
-                          style={{ fontSize: 15, marginRight: "2%" }}
-                          icon={faFlag}
-                        />
-                        {booking.ground_type}
-                      </p>
-                      <p className="dayLeft">
-                        <FontAwesomeIcon
-                          style={{ fontSize: 15, marginRight: "2%" }}
-                          icon={faCalendarDay}
-                        />
-                        {formatDate(booking.date)}
-                      </p>
-                      <p className="slotLeft">
-                        <FontAwesomeIcon
-                          style={{ fontSize: 15, marginRight: "2%" }}
-                          icon={faClock}
-                        />
-                        {convertTo12HourFormat(
-                          booking.booking_start_time.slice(0, 5)
-                        )}{" "}
-                        to{" "}
-                        {convertTo12HourFormat(
-                          booking.booking_end_time.slice(0, 5)
-                        )}
-                      </p>
-                    </Link>
+                      <Link
+                        style={{ textDecoration: "none", color: "black" }}
+                        to={`/bookingDetails/${booking.booking_id}`}
+                        key={booking.booking_id}
+                      >
+                        <h2 className="venueLeft">
+                          <FontAwesomeIcon
+                            style={{ fontSize: 18, marginRight: "2%" }}
+                            icon={faLocationDot}
+                          />
+                          {booking.club_name}
+                        </h2>
+                        <p className="activityLeft">
+                          <FontAwesomeIcon
+                            style={{ fontSize: 15, marginRight: "2%" }}
+                            icon={faFlag}
+                          />
+                          {booking.ground_type}
+                        </p>
+                        <p className="dayLeft">
+                          <FontAwesomeIcon
+                            style={{ fontSize: 15, marginRight: "2%" }}
+                            icon={faCalendarDay}
+                          />
+                          {formatDate(booking.date)}
+                        </p>
+                        <p className="slotLeft">
+                          <FontAwesomeIcon
+                            style={{ fontSize: 15, marginRight: "2%" }}
+                            icon={faClock}
+                          />
+                          {convertTo12HourFormat(
+                            booking.booking_start_time.slice(0, 5)
+                          )}{" "}
+                          to{" "}
+                          {convertTo12HourFormat(
+                            booking.booking_end_time.slice(0, 5)
+                          )}
+                        </p>
+                      </Link>
+                    </motion.div>
                   ))
               ) : (
                 <div className="noBookings">
@@ -384,12 +399,17 @@ function WelcomeUser() {
               See all
             </Link>
           </ul>
-        </div>
+        </motion.div>
         <div className="rightBar">
-          <div className="greetContainer">
+          {" "}
+          <motion.div
+            className="greetContainer"
+            initial={{ y: -100 }}
+            animate={{ y: 0 }}
+            transition={{ type: "tween", stiffness: 120 }}
+          >
             <Greeting name={name} />
-          </div>
-
+          </motion.div>
           <div className="venueContainer">
             <h2 className="groundActivityHeading">Grounds</h2>
             <div className="groundVenueContainer">
@@ -407,73 +427,83 @@ function WelcomeUser() {
                 </div>
               ) : (
                 filterResults(grounds).map((ground) => (
-                  <Link
-                    to={`/groundDetails/${ground.ground_id}`}
-                    key={ground.ground_id}
+                  <motion.div
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.9 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5 }}
                     className="venueCard"
                   >
-                    {ground.photo1 ? (
-                      <img
-                        className="venuePic"
-                        src={ground.photo1}
-                        alt="Ground"
-                      />
-                    ) : (
-                      <img
-                        className="venuePic"
-                        src={defaultGroundPic}
-                        alt="Default Ground"
-                      />
-                    )}
-                    <h3 style={{ marginLeft: "2%", color: "#F99810" }}>
-                      <FontAwesomeIcon
-                        style={{ fontSize: 15, marginRight: "2%" }}
-                        icon={faLocationDot}
-                      />
-                      {ground.club_name}{" "}
-                      {ground.address &&
-                        latitude &&
-                        longitude &&
-                        `(~ ${Math.ceil(
-                          parseFloat(
-                            getDistanceBetweenLocations(
-                              ground.address,
-                              latitude,
-                              longitude
-                            )
-                          ) * 1.5
-                        )} km)`}
-                    </h3>
+                    <Link
+                      style={{ textDecoration: "none", color: "black" }}
+                      to={`/groundDetails/${ground.ground_id}`}
+                      key={ground.ground_id}
+                    >
+                      {ground.photo1 ? (
+                        <img
+                          className="venuePic"
+                          src={ground.photo1}
+                          alt="Ground"
+                        />
+                      ) : (
+                        <img
+                          className="venuePic"
+                          src={defaultGroundPic}
+                          alt="Default Ground"
+                        />
+                      )}
+                      <h3 style={{ marginLeft: "2%", color: "#F99810" }}>
+                        <FontAwesomeIcon
+                          style={{ fontSize: 15, marginRight: "2%" }}
+                          icon={faLocationDot}
+                        />
+                        {ground.club_name}{" "}
+                        {ground.address.startsWith("https://") &&
+                          ground.address.includes("maps") &&
+                          latitude &&
+                          longitude &&
+                          `(~ ${Math.ceil(
+                            parseFloat(
+                              getDistanceBetweenLocations(
+                                ground.address,
+                                latitude,
+                                longitude
+                              )
+                            ) * 1.5
+                          )} km)`}
+                      </h3>
 
-                    <p>
-                      <FontAwesomeIcon
-                        style={{ fontSize: 15, marginRight: "2%" }}
-                        icon={faFlag}
-                      />
-                      Ground Type: {ground.type}
-                    </p>
-                    <p>
-                      <FontAwesomeIcon
-                        style={{ fontSize: 15, marginRight: "2%" }}
-                        icon={faHourglassStart}
-                      />
-                      Opens at {convertTo12HourFormat(ground.start_time)}
-                    </p>
-                    <p>
-                      <FontAwesomeIcon
-                        style={{ fontSize: 15, marginRight: "2%" }}
-                        icon={faHourglassEnd}
-                      />
-                      Closes at {convertTo12HourFormat(ground.end_time)}
-                    </p>
-                    <p>
-                      <FontAwesomeIcon
-                        style={{ fontSize: 15, marginRight: "2%" }}
-                        icon={faIndianRupeeSign}
-                      />
-                      Price: {ground.price}
-                    </p>
-                  </Link>
+                      <p>
+                        <FontAwesomeIcon
+                          style={{ fontSize: 15, marginRight: "2%" }}
+                          icon={faFlag}
+                        />
+                        Ground Type: {ground.type}
+                      </p>
+                      <p>
+                        <FontAwesomeIcon
+                          style={{ fontSize: 15, marginRight: "2%" }}
+                          icon={faHourglassStart}
+                        />
+                        Opens at {convertTo12HourFormat(ground.start_time)}
+                      </p>
+                      <p>
+                        <FontAwesomeIcon
+                          style={{ fontSize: 15, marginRight: "2%" }}
+                          icon={faHourglassEnd}
+                        />
+                        Closes at {convertTo12HourFormat(ground.end_time)}
+                      </p>
+                      <p>
+                        <FontAwesomeIcon
+                          style={{ fontSize: 15, marginRight: "2%" }}
+                          icon={faIndianRupeeSign}
+                        />
+                        Price: {ground.price}
+                      </p>
+                    </Link>
+                  </motion.div>
                 ))
               )}
             </div>
@@ -493,89 +523,102 @@ function WelcomeUser() {
                   <p style={{ marginTop: "320px" }}>No activities available</p>
                 </div>
               ) : (
-                filterResults(activities).map((activity) => (
-                  <Link
-                    to={`/activityDetails/${activity.activity_id}`}
-                    key={activity.activity_id}
-                    className="activityCard"
-                  >
-                    {activity.photo1 ? (
-                      <img
-                        className="venuePic"
-                        src={activity.photo1}
-                        alt="Activity"
-                      />
-                    ) : (
-                      <img
-                        className="venuePic"
-                        src={defaultGroundPic}
-                        alt="Default Activity"
-                      />
-                    )}
-                    <h3 style={{ marginLeft: "2%", color: "#F99810" }}>
-                      <FontAwesomeIcon
-                        style={{ fontSize: 15, marginRight: "2%" }}
-                        icon={faFireFlameCurved}
-                      />
-                      {activity.activity_name}
-                    </h3>
-                    <h4 style={{ marginLeft: "2%" }}>
-                      <FontAwesomeIcon
-                        style={{ fontSize: 15, marginRight: "2%" }}
-                        icon={faLocationDot}
-                      />
-                      {activity.club_name}{" "}
-                      {activity.address &&
-                        latitude &&
-                        longitude &&
-                        `(~ ${Math.ceil(
-                          parseFloat(
-                            getDistanceBetweenLocations(
-                              activity.address,
-                              latitude,
-                              longitude
-                            )
-                          ) * 1.5
-                        )} km)`}
-                    </h4>
-                    <p>
-                      <FontAwesomeIcon
-                        style={{ fontSize: 15, marginRight: "2%" }}
-                        icon={faCalendarDays}
-                      />
-                      From {activity.start_date} to {activity.end_date}
-                    </p>
-                    <p>
-                      <FontAwesomeIcon
-                        style={{ fontSize: 15, marginRight: "2%" }}
-                        icon={faHourglassHalf}
-                      />
-                      Timings: {convertTo12HourFormat(activity.start_time)} -{" "}
-                      {convertTo12HourFormat(activity.end_time)}
-                    </p>
-                    <p>
-                      <FontAwesomeIcon
-                        style={{ fontSize: 15, marginRight: "2%" }}
-                        icon={faPeopleGroup}
-                      />
-                      Age group: {activity.age_group}
-                    </p>
-                    <p>
-                      <FontAwesomeIcon
-                        style={{ fontSize: 15, marginRight: "2%" }}
-                        icon={faTicketAlt}
-                      />
-                      Entries: {activity.capacity}
-                    </p>
-                    <p>
-                      <FontAwesomeIcon
-                        style={{ fontSize: 15, marginRight: "2%" }}
-                        icon={faIndianRupeeSign}
-                      />
-                      Price: {Math.floor(activity.price)}/person
-                    </p>
-                  </Link>
-                ))
+                filterResults(activities)
+                  .filter(
+                    (activity) => new Date(activity.end_date) > new Date()
+                  ) // Filter out activities whose end date is in the future
+                  .map((activity) => (
+                    <motion.div
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.9 }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.5 }}
+                      className="activityCard"
+                    >
+                      <Link
+                        to={`/activityDetails/${activity.activity_id}`}
+                        key={activity.activity_id}
+                        style={{ textDecoration: "none", color: "black" }}
+                      >
+                        {activity.photo1 ? (
+                          <img
+                            className="venuePic"
+                            src={activity.photo1}
+                            alt="Activity"
+                          />
+                        ) : (
+                          <img
+                            className="venuePic"
+                            src={defaultGroundPic}
+                            alt="Default Activity"
+                          />
+                        )}
+                        <h3 style={{ marginLeft: "2%", color: "#F99810" }}>
+                          <FontAwesomeIcon
+                            style={{ fontSize: 15, marginRight: "2%" }}
+                            icon={faFireFlameCurved}
+                          />
+                          {activity.activity_name}
+                        </h3>
+                        <h4 style={{ marginLeft: "2%" }}>
+                          <FontAwesomeIcon
+                            style={{ fontSize: 15, marginRight: "2%" }}
+                            icon={faLocationDot}
+                          />
+                          {activity.club_name}{" "}
+                          {activity.address &&
+                            latitude &&
+                            longitude &&
+                            `(~ ${Math.ceil(
+                              parseFloat(
+                                getDistanceBetweenLocations(
+                                  activity.address,
+                                  latitude,
+                                  longitude
+                                )
+                              ) * 1.5
+                            )} km)`}
+                        </h4>
+                        <p>
+                          <FontAwesomeIcon
+                            style={{ fontSize: 15, marginRight: "2%" }}
+                            icon={faCalendarDays}
+                          />
+                          From {activity.start_date} to {activity.end_date}
+                        </p>
+                        <p>
+                          <FontAwesomeIcon
+                            style={{ fontSize: 15, marginRight: "2%" }}
+                            icon={faHourglassHalf}
+                          />
+                          Timings: {convertTo12HourFormat(activity.start_time)}{" "}
+                          - {convertTo12HourFormat(activity.end_time)}
+                        </p>
+                        <p>
+                          <FontAwesomeIcon
+                            style={{ fontSize: 15, marginRight: "2%" }}
+                            icon={faPeopleGroup}
+                          />
+                          Age group: {activity.age_group}
+                        </p>
+                        <p>
+                          <FontAwesomeIcon
+                            style={{ fontSize: 15, marginRight: "2%" }}
+                            icon={faTicketAlt}
+                          />
+                          Entries: {activity.capacity}
+                        </p>
+                        <p>
+                          <FontAwesomeIcon
+                            style={{ fontSize: 15, marginRight: "2%" }}
+                            icon={faIndianRupeeSign}
+                          />
+                          Price: {Math.floor(activity.price)}/person
+                        </p>
+                      </Link>
+                    </motion.div>
+                  ))
               )}
             </div>
             <div className="blank"></div>

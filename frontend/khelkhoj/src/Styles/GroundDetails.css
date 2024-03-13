@@ -23,7 +23,7 @@
 }
 .groundImage {
   height: 100%;
-  width: 100%;
+  width: 900px;
   object-fit: cover;
   border-radius: 10px;
   box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 8px;
@@ -163,6 +163,28 @@
   color: #000;
 }
 
+.updateActivityNowButton {
+  color: #fff;
+  background-color: #000;
+  text-decoration: none;
+  font-weight: 500;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 22px;
+  border-radius: 20px;
+  transition: all 0.5s ease;
+  cursor: pointer;
+  margin-top: 5%;
+  padding-left: 2%;
+  padding-right: 2%;
+}
+
+.updateActivityNowButton:hover {
+  background-color: #f99810;
+  color: #000;
+}
+
 .clubGroundDeleteNowButton {
   color: #fff;
   background-color: #ff0000;
@@ -186,6 +208,7 @@
 .groundAddress {
   text-decoration: none;
   font-weight: 500;
+  cursor: pointer;
   margin-top: -6px;
   padding-bottom: 4%;
   color: #000;
@@ -194,6 +217,17 @@
 
 .groundAddress:hover {
   color: #f99810;
+}
+
+.groundAddress2 {
+  text-decoration: none;
+  font-weight: 500;
+  margin-top: -6px;
+  padding-bottom: 4%;
+  color: #000;
+  transition: all 0.5s ease;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .bookNowContainer {
@@ -272,4 +306,59 @@
   text-align: center;
   width: 100%;
   color: #ff0000;
+}
+
+.EnquiryClubContainer {
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4%;
+  margin-top: 4%;
+  border-radius: 10px;
+  border: solid #bbb 2px;
+}
+
+.inquiryItem {
+  display: flex;
+  height: 100%;
+  width: 88%;
+  border-radius: 10px;
+  flex-direction: column;
+  padding: 4%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  border: solid #bbb 2px;
+  margin-top: 2%;
+}
+
+.enquiryStatusUpdate {
+  font-family: "Poppins", sans-serif;
+  height: 40px;
+  width: 40%;
+  align-self: center;
+  text-align: center;
+  border-radius: 10px;
+}
+
+.scrollableEnquiry {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 400px;
+  overflow: hidden;
+  border-top: solid #000 2px;
+  border-bottom: solid #000 2px;
+}
+
+.enquiriesClub {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: auto;
+  width: 100%;
+  overflow-y: auto;
 }

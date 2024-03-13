@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import BookingModal from "../Components/BookingModal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   faCalendarDay,
   faChevronLeft,
@@ -19,6 +20,7 @@ import logo from "../assets/KhelKhojLogo.png";
 import axios from "axios";
 import defaultGroundPic from "../assets/defaultGround.webp";
 import "../Styles/GroundDetails.css";
+import Loader from "../Components/Loader";
 
 function GroundDetails() {
   const [ground, setGround] = useState(null);
@@ -220,7 +222,7 @@ function GroundDetails() {
   };
 
   if (!ground) {
-    return <div>Loading...</div>;
+    return <Loader type="user" />;
   }
 
   return (
@@ -246,18 +248,25 @@ function GroundDetails() {
           </ul>
         </div>
       </div>
-      <div className="mainGroundDetails">
-        {showModal && (
-          <BookingModal
-            onClose={() => setShowmodal(false)}
-            userId={userId}
-            bookingDetails={{
-              values: values,
-              ground: ground,
-              duration: duration,
-            }}
-          />
-        )}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="mainGroundDetails"
+      >
+        <AnimatePresence>
+          {showModal && (
+            <BookingModal
+              onClose={() => setShowmodal(false)}
+              userId={userId}
+              bookingDetails={{
+                values: values,
+                ground: ground,
+                duration: duration,
+              }}
+            />
+          )}
+        </AnimatePresence>
         <div className="leftGroundDetContainer">
           <h1>{ground.club_name}</h1>
           <div className="photoContainer">
@@ -325,14 +334,23 @@ function GroundDetails() {
               {" "}
               <FontAwesomeIcon icon={faMapLocationDot} /> Address:
             </h3>
-            <a
-              className="groundAddress"
-              href={ground.address}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              View on Google Maps
-            </a>
+            {ground.address ? (
+              ground.address.startsWith("https://") &&
+              ground.address.includes("maps") ? (
+                <a
+                  className="groundAddress"
+                  href={ground.address}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  View on Google Maps
+                </a>
+              ) : (
+                <p className="groundAddress2">{ground.address}</p>
+              )
+            ) : (
+              <p className="groundAddress2">No address available</p>
+            )}
           </div>
           <div className="bookNowContainer">
             <div className="dateContainer">
@@ -409,7 +427,7 @@ function GroundDetails() {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

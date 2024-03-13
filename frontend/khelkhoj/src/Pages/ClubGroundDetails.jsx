@@ -142,14 +142,23 @@ function ClubGroundDetails() {
               {" "}
               <FontAwesomeIcon icon={faMapLocationDot} /> Address:
             </h3>
-            <a
-              className="groundAddress"
-              href={ground.address}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              View on Google Maps
-            </a>
+            {ground.address ? (
+              ground.address.startsWith("https://") &&
+              ground.address.includes("maps") ? (
+                <a
+                  className="groundAddress"
+                  href={ground.address}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  View on Google Maps
+                </a>
+              ) : (
+                <p className="groundAddress2">{ground.address}</p>
+              )
+            ) : (
+              <p className="groundAddress2">No address available</p>
+            )}
           </div>
           <Link
             to={`/updateGround/${ground.ground_id}`}

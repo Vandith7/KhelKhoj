@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import logo from "../assets/KhelKhojLogo.png";
 import "../Styles/AllBookings.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { motion } from "framer-motion";
 import {
   faLocationDot,
   faCalendarDay,
@@ -47,7 +48,7 @@ function AllBookings() {
           );
           return bookingDate < today;
         });
-
+        console.log(sortedBookings);
         setUpcomingBookings(upcoming);
         setPastBookings(past);
       }
@@ -89,47 +90,56 @@ function AllBookings() {
         <div className="groundBookingContainer">
           {upcomingBookings && upcomingBookings.length > 0 ? (
             upcomingBookings.map((upcomingBooking) => (
-              <Link
-                to={`/bookingDetails/${upcomingBooking.booking_id}`}
-                //   className="cardsLeft"
+              <motion.div
+                whileTap={{ scale: 0.9 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
                 className="allBookingCards"
-                key={upcomingBooking.booking_id}
               >
-                <h2 className="allBookingName">
-                  <FontAwesomeIcon
-                    style={{ fontSize: 18, marginRight: "2%" }}
-                    icon={faLocationDot}
-                  />
-                  {upcomingBooking.club_name}{" "}
-                </h2>
-                <p>
-                  <FontAwesomeIcon
-                    style={{ fontSize: 15, marginRight: "2%" }}
-                    icon={faFlag}
-                  />
-                  {upcomingBooking.ground_type}
-                </p>
-                <p>
-                  <FontAwesomeIcon
-                    style={{ fontSize: 15, marginRight: "2%" }}
-                    icon={faCalendarDay}
-                  />
-                  {formatDate(upcomingBooking.date)}
-                </p>
-                <p>
-                  <FontAwesomeIcon
-                    style={{ fontSize: 15, marginRight: "2%" }}
-                    icon={faClock}
-                  />
-                  {convertTo12HourFormat(
-                    upcomingBooking.booking_start_time.slice(0, 5)
-                  )}{" "}
-                  to{" "}
-                  {convertTo12HourFormat(
-                    upcomingBooking.booking_end_time.slice(0, 5)
-                  )}
-                </p>
-              </Link>
+                <Link
+                  style={{ color: "black", textDecoration: "none" }}
+                  to={`/bookingDetails/${upcomingBooking.booking_id}`}
+                  //   className="cardsLeft"
+
+                  key={upcomingBooking.booking_id}
+                >
+                  <h2 className="allBookingName">
+                    <FontAwesomeIcon
+                      style={{ fontSize: 18, marginRight: "2%" }}
+                      icon={faLocationDot}
+                    />
+                    {upcomingBooking.club_name}{" "}
+                  </h2>
+                  <p>
+                    <FontAwesomeIcon
+                      style={{ fontSize: 15, marginRight: "2%" }}
+                      icon={faFlag}
+                    />
+                    {upcomingBooking.ground_type}
+                  </p>
+                  <p>
+                    <FontAwesomeIcon
+                      style={{ fontSize: 15, marginRight: "2%" }}
+                      icon={faCalendarDay}
+                    />
+                    {formatDate(upcomingBooking.date)}
+                  </p>
+                  <p>
+                    <FontAwesomeIcon
+                      style={{ fontSize: 15, marginRight: "2%" }}
+                      icon={faClock}
+                    />
+                    {convertTo12HourFormat(
+                      upcomingBooking.booking_start_time.slice(0, 5)
+                    )}{" "}
+                    to{" "}
+                    {convertTo12HourFormat(
+                      upcomingBooking.booking_end_time.slice(0, 5)
+                    )}
+                  </p>
+                </Link>
+              </motion.div>
             ))
           ) : (
             // <div className="allBookingContainer">
@@ -147,47 +157,54 @@ function AllBookings() {
         <div className="groundBookingContainer">
           {pastBookings && pastBookings.length > 0 ? (
             pastBookings.map((pastBooking) => (
-              <Link
-                to={`/bookingDetails/${pastBooking.booking_id}`}
-                //   className="cardsLeft"
+              <motion.div
+                whileTap={{ scale: 0.9 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
                 className="allBookingCards"
-                key={pastBooking.booking_id}
               >
-                <h2 className="allBookingName">
-                  <FontAwesomeIcon
-                    style={{ fontSize: 18, marginRight: "2%" }}
-                    icon={faLocationDot}
-                  />
-                  {pastBooking.club_name}{" "}
-                </h2>
-                <p>
-                  <FontAwesomeIcon
-                    style={{ fontSize: 15, marginRight: "2%" }}
-                    icon={faFlag}
-                  />
-                  {pastBooking.ground_type}
-                </p>
-                <p>
-                  <FontAwesomeIcon
-                    style={{ fontSize: 15, marginRight: "2%" }}
-                    icon={faCalendarDay}
-                  />
-                  {formatDate(pastBooking.date)}
-                </p>
-                <p>
-                  <FontAwesomeIcon
-                    style={{ fontSize: 15, marginRight: "2%" }}
-                    icon={faClock}
-                  />
-                  {convertTo12HourFormat(
-                    pastBooking.booking_start_time.slice(0, 5)
-                  )}{" "}
-                  to{" "}
-                  {convertTo12HourFormat(
-                    pastBooking.booking_end_time.slice(0, 5)
-                  )}
-                </p>
-              </Link>
+                <Link
+                  to={`/bookingDetails/${pastBooking.booking_id}`}
+                  style={{ color: "black", textDecoration: "none" }}
+                  key={pastBooking.booking_id}
+                >
+                  <h2 className="allBookingName">
+                    <FontAwesomeIcon
+                      style={{ fontSize: 18, marginRight: "2%" }}
+                      icon={faLocationDot}
+                    />
+                    {pastBooking.club_name}{" "}
+                  </h2>
+                  <p>
+                    <FontAwesomeIcon
+                      style={{ fontSize: 15, marginRight: "2%" }}
+                      icon={faFlag}
+                    />
+                    {pastBooking.ground_type}
+                  </p>
+                  <p>
+                    <FontAwesomeIcon
+                      style={{ fontSize: 15, marginRight: "2%" }}
+                      icon={faCalendarDay}
+                    />
+                    {formatDate(pastBooking.date)}
+                  </p>
+                  <p>
+                    <FontAwesomeIcon
+                      style={{ fontSize: 15, marginRight: "2%" }}
+                      icon={faClock}
+                    />
+                    {convertTo12HourFormat(
+                      pastBooking.booking_start_time.slice(0, 5)
+                    )}{" "}
+                    to{" "}
+                    {convertTo12HourFormat(
+                      pastBooking.booking_end_time.slice(0, 5)
+                    )}
+                  </p>
+                </Link>
+              </motion.div>
             ))
           ) : (
             <div className="allBookingContainer">

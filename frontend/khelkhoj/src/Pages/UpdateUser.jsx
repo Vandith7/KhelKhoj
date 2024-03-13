@@ -141,7 +141,7 @@ function UpdateUser() {
             </div>
             <div className="updateButtonsHolder">
               <button className="loginButton">Update</button>
-              <Link to="/welcomeClub" className="noThanksUpdateButton">
+              <Link to="/welcomeUser" className="noThanksUpdateButton">
                 No thanks
               </Link>
             </div>
