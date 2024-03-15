@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion"; // Import motion from framer-motion
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCamera, faTimesCircle } from "@fortawesome/free-solid-svg-icons";
+import Swal from "sweetalert2";
 
 function MultipleImage(props) {
   const [imageBlobs, setImageBlobs] = useState([]);
@@ -13,7 +14,13 @@ function MultipleImage(props) {
     if (files) {
       const newImageBlobs = [...imageBlobs];
       if (newImageBlobs.length + files.length > 4) {
-        alert("You can only upload a maximum of 4 images.");
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "You can only upload a maximum of 4 images.",
+          confirmButtonColor: "#f19006", // Orange color
+          confirmButtonClass: "swal-button-black",
+        });
         return;
       }
 

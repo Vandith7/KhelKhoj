@@ -4,6 +4,7 @@ import "../Styles/BookingModal.css";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 function CancelModal(props) {
   const modalRef = useRef();
@@ -36,7 +37,22 @@ function CancelModal(props) {
             )
             .then((res) => {
               if (res.data.status === "Success") {
-                navigate.push("/welcomeUser");
+                // navigate.push("/welcomeUser");
+                Swal.fire({
+                  title: "Ground Booking Cancelled!",
+                  confirmButtonText: "Home",
+                  confirmButtonColor: "#f19006",
+                  // text: `Gear up for some ${ground.type} action at ${
+                  //   ground.club_name
+                  // } from ${convertTo12HourFormat(
+                  //   values.startTime
+                  // )} to ${convertTo12HourFormat(
+                  //   values.endTime
+                  // )} on ${formatDate(values.date)}!`,
+                  icon: "success",
+                }).then(() => {
+                  navigate.push("/welcomeUser");
+                });
               }
             })
             .catch((err) => {

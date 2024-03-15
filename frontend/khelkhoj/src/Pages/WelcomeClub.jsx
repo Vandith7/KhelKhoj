@@ -279,7 +279,10 @@ function WelcomeClub() {
           <div className="addGroundAndActivities">
             {grounds.length > 0 ? (
               <div className="groundsClubContainer">
-                <h1 style={{ color: "#F99810" }}> Your Grounds </h1>
+                <h2 style={{ color: "#F99810", margin: "0" }}>
+                  {" "}
+                  Your Grounds{" "}
+                </h2>
                 <div>
                   {grounds.map((ground) => (
                     <motion.div
@@ -291,6 +294,7 @@ function WelcomeClub() {
                       transition={{ duration: 0.5 }}
                     >
                       <Link
+                        className="venueLink"
                         style={{ color: "black", textDecoration: "none" }}
                         to={`/clubGroundDetails/${ground.ground_id}`}
                         key={ground.ground_id}
@@ -377,7 +381,10 @@ function WelcomeClub() {
 
             {activities.length > 0 ? (
               <div className="groundsClubContainer">
-                <h1 style={{ color: "#F99810" }}> Your Activities </h1>
+                <h2 style={{ color: "#F99810", margin: "0" }}>
+                  {" "}
+                  Your Activities{" "}
+                </h2>
                 <div>
                   {activities.map((activity) => (
                     <motion.div
@@ -389,6 +396,7 @@ function WelcomeClub() {
                     >
                       {" "}
                       <Link
+                        className="venueLink"
                         style={{ color: "black", textDecoration: "none" }}
                         to={`/clubActivityDetails/${activity.activity_id}`}
                         key={activity.activity_id}

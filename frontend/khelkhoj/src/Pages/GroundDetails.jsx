@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useHistory } from "react-router-dom";
 import BookingModal from "../Components/BookingModal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AnimatePresence, motion } from "framer-motion";
@@ -7,6 +7,7 @@ import {
   faCalendarDay,
   faChevronLeft,
   faChevronRight,
+  faCircleArrowLeft,
   faCircleInfo,
   faClock,
   faFlag,
@@ -32,6 +33,7 @@ function GroundDetails() {
   const [userId, setUserId] = useState("");
   const [slotError, setSlotError] = useState("");
   const [showModal, setShowmodal] = useState(false);
+  const navigate = useHistory();
   const MAX_DURATION = 2;
   let { groundId } = useParams();
   const [values, setValues] = useState({
@@ -220,6 +222,9 @@ function GroundDetails() {
       userId: userId,
     }));
   };
+  const navigateToHome = () => {
+    navigate.push("/welcomeUser");
+  };
 
   if (!ground) {
     return <Loader type="user" />;
@@ -268,7 +273,14 @@ function GroundDetails() {
           )}
         </AnimatePresence>
         <div className="leftGroundDetContainer">
-          <h1>{ground.club_name}</h1>
+          <h1>
+            <FontAwesomeIcon
+              icon={faCircleArrowLeft}
+              className="groundBackButton"
+              onClick={navigateToHome}
+            />{" "}
+            {ground.club_name}
+          </h1>
           <div className="photoContainer">
             <FontAwesomeIcon
               icon={faChevronLeft}

@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useHistory } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   faCalendar,
   faChevronLeft,
   faChevronRight,
+  faCircleArrowLeft,
   faCircleInfo,
   faClock,
   faFireFlameCurved,
@@ -24,12 +25,14 @@ import axios from "axios";
 import defaultGroundPic from "../assets/defaultGround.webp";
 import "../Styles/GroundDetails.css";
 import ActivityModal from "../Components/ActivityModal";
+import Loader from "../Components/Loader";
 
 function ActivityDetails() {
   const [ground, setGround] = useState(null);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [userId, setUserId] = useState("");
   const [showModal, setShowmodal] = useState(false);
+  const navigate = useHistory();
   let { activityId } = useParams();
   const handleEnquireNow = () => {
     setShowmodal(true);
@@ -72,7 +75,9 @@ function ActivityDetails() {
     };
     return date.toLocaleDateString("en-GB", options);
   };
-
+  const navigateToHome = () => {
+    navigate.push("/welcomeUser");
+  };
   function formatTime(timeString) {
     const [hour, minute] = timeString.split(":");
     const hourInt = parseInt(hour);
@@ -82,7 +87,7 @@ function ActivityDetails() {
   }
 
   if (!ground) {
-    return <div>Loading...</div>;
+    return <Loader type="user" />;
   }
 
   return (
@@ -120,12 +125,20 @@ function ActivityDetails() {
             <ActivityModal
               onClose={() => setShowmodal(false)}
               activityId={activityId}
-              bookingDetails={{}}
+              club_name={ground.club_name}
             />
           )}
         </AnimatePresence>
         <div className="leftGroundDetContainer">
-          <h1>{ground.club_name}</h1>
+          <h1>
+            {" "}
+            <FontAwesomeIcon
+              icon={faCircleArrowLeft}
+              className="groundBackButton"
+              onClick={navigateToHome}
+            />{" "}
+            {ground.club_name}
+          </h1>
           <div className="photoContainer">
             <FontAwesomeIcon
               icon={faChevronLeft}

@@ -10,6 +10,7 @@ import {
   faArrowLeftLong,
   faIndianRupeeSign,
 } from "@fortawesome/free-solid-svg-icons";
+import Loader from "../Components/Loader";
 
 function BookingDetails() {
   const { bookingId } = useParams();
@@ -38,7 +39,7 @@ function BookingDetails() {
   }, [bookingId]);
 
   if (!booking) {
-    return <div>Loading...</div>;
+    return <Loader type="user" />;
   }
 
   // Format the date

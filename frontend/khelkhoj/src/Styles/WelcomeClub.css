@@ -50,6 +50,7 @@
 
 .groundsClubContainer {
   overflow-y: auto;
+  padding-top: 1%;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -58,6 +59,8 @@
   word-wrap: break-word;
   overflow-wrap: break-word;
   font-family: "Poppins", sans-serif;
+  border-right: solid #9d7947 1px;
+  border-top: solid #9d7947 1px;
 }
 
 .addGroundSmall {
@@ -90,6 +93,7 @@
   cursor: pointer;
   font-family: "Poppins", sans-serif;
   margin: 3%;
+  margin-bottom: 10%;
   border-radius: 10px;
   box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 8px;
   overflow: hidden; /* Ensure overflow is hidden to contain content */
@@ -99,6 +103,7 @@
 
 .groundClubPic {
   height: auto;
+  max-height: 180px;
   width: 100%;
   background-position: center;
   object-position: center;

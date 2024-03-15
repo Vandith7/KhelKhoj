@@ -3,6 +3,7 @@ import { useParams, useHistory, Link } from "react-router-dom";
 import axios from "axios";
 import logo from "../assets/KhelKhojLogo.png";
 import MultipleImage from "../Components/MultipleImage";
+import Swal from "sweetalert2";
 
 function UpdateActivity() {
   const { activityId } = useParams();
@@ -74,7 +75,15 @@ function UpdateActivity() {
       })
       .then((res) => {
         if (res.data.status === "Success") {
-          navigate.push("/welcomeClub");
+          Swal.fire({
+            title: "Activity Updated!",
+            confirmButtonText: "Home",
+            confirmButtonColor: "#f19006",
+
+            icon: "success",
+          }).then(() => {
+            navigate.push("/welcomeClub");
+          });
         }
       })
       .catch((err) => {

@@ -5,6 +5,7 @@ import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { motion } from "framer-motion";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 function BookingModal(props) {
   const modalRef = useRef();
@@ -24,8 +25,20 @@ function BookingModal(props) {
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+  function convertTo12HourFormat(timeString) {
+    const [hour, minute] = timeString.split(":");
+    const hourInt = parseInt(hour);
+    const suffix = hourInt >= 12 ? "PM" : "AM";
+    const hour12 = hourInt % 12 || 12;
+    return `${hour12}:${minute} ${suffix}`;
+  }
 
-  const { values, ground, duration } = props.bookingDetails;
+  function formatDate(dateString) {
+    const options = { day: "numeric", month: "short", year: "numeric" };
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", options);
+  }
+  const { values, ground } = props.bookingDetails;
 
   const handleConfirmation = (event) => {
     event.preventDefault();
@@ -40,14 +53,20 @@ function BookingModal(props) {
             )
             .then((response) => {
               if (response.data.status === "Success") {
-                navigate.push("/groundConfirmation", {
-                  values: {
-                    ...values,
-                    club_name: ground.club_name,
-                    ground_type: ground.type,
-                    price: ground.price,
-                    duration: duration,
-                  },
+                Swal.fire({
+                  title: "Ground Booked!",
+                  confirmButtonText: "Home",
+                  confirmButtonColor: "#f19006",
+                  text: `Gear up for some ${ground.type} action at ${
+                    ground.club_name
+                  } from ${convertTo12HourFormat(
+                    values.startTime
+                  )} to ${convertTo12HourFormat(
+                    values.endTime
+                  )} on ${formatDate(values.date)}!`,
+                  icon: "success",
+                }).then(() => {
+                  navigate.push("/welcomeUser");
                 });
               }
             })

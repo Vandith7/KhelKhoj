@@ -394,9 +394,8 @@ router.post('/grounds/:groundId/book', (req, res) => {
 
             // If there are overlapping bookings, rollback transaction and return "Slot not available"
             if (availabilityResult.length > 0) {
-                db.rollback(function () {
-                    res.status(500).json({ error: "No slots available for specified time" });
-                });
+                // If there are overlapping bookings, send response and return to exit the function
+                return res.status(400).json({ error: "No slots available for specified time" });
             }
 
             // If the slot is available, insert a new booking record
@@ -407,8 +406,7 @@ router.post('/grounds/:groundId/book', (req, res) => {
                 if (insertErr) {
                     console.error("Error booking ground slot:", insertErr);
                     return db.rollback(function () {
-                        // res.status(500).json({ status: "Error", error: "Internal Server Error" });
-                        res.status(500).json({ error: "No slots available for specified time" });
+                        res.status(500).json({ error: "Internal Server Error" });
                     });
                 }
                 // Commit transaction if everything is successful
@@ -416,12 +414,13 @@ router.post('/grounds/:groundId/book', (req, res) => {
                     if (commitErr) {
                         console.error("Error committing transaction:", commitErr);
                         return db.rollback(function () {
-                            res.status(500).json({ status: "Error", error: "Internal Server Error" });
+                            res.status(500).json({ error: "Internal Server Error" });
                         });
                     }
                     return res.json({ status: "Success", message: "Ground slot booked successfully" });
                 });
             });
+
         });
     });
 });
@@ -546,7 +545,10 @@ router.post('/bookings/:bookingId/cancel', verifyUser, (req, res) => {
 router.post('/updateProfile', verifyUser, upload.single('profile_photo'), (req, res) => {
     const userId = req.userData.user_id;
     const { name, email } = req.body;
-    const profile_photo = req.body.profile_photo || null;
+    let profile_photo = null;
+    if (req.body.profile_photo != null) {
+        profile_photo = req.body.profile_photo;
+    }
 
     // Check if the provided email is already in use by another user
     if (email) {

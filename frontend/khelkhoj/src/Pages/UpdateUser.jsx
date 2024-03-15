@@ -4,6 +4,7 @@ import logo from "../assets/KhelKhojLogo.png";
 import axios from "axios";
 import defaultDp from "../assets/user.jpg";
 import FileImageUploader from "../Components/FileImageUploader";
+import Swal from "sweetalert2";
 
 function UpdateUser() {
   const [profilePhoto, setProfilePhoto] = useState(null);
@@ -12,7 +13,7 @@ function UpdateUser() {
   const [values, setValues] = useState({
     name: "",
     email: "",
-    profile_photo: null,
+    profile_photo: profilePhoto,
   });
   const navigate = useHistory();
   useEffect(() => {
@@ -43,7 +44,15 @@ function UpdateUser() {
       .post("http://localhost:3001/user/updateProfile", values)
       .then((res) => {
         if (res.data.status === "Success") {
-          navigate.push("/welcomeUser");
+          Swal.fire({
+            title: "Profile Updated!",
+            confirmButtonText: "Home",
+            confirmButtonColor: "#f19006",
+
+            icon: "success",
+          }).then(() => {
+            navigate.push("/welcomeUser");
+          });
         }
       })
       .catch((err) => {
@@ -124,7 +133,6 @@ function UpdateUser() {
               onChange={handleNameChange}
               type="text"
               id="name"
-              autoFocus
               placeholder="Enter new user name"
               className="inputField"
             ></input>{" "}

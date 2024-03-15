@@ -7,11 +7,20 @@
   /* background-color: aqua; */
 }
 
+.groundBackButton {
+  cursor: pointer;
+  transition: all 0.5s ease;
+  margin-right: 10px;
+}
+
+.groundBackButton:hover {
+  color: #f99810;
+}
+
 .leftGroundDetContainer {
   width: 68%;
   margin-left: 4%;
   height: 100%;
-  /* background-color: blue; */
 }
 
 .photoContainer {

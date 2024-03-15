@@ -439,6 +439,7 @@ function WelcomeUser() {
                       style={{ textDecoration: "none", color: "black" }}
                       to={`/groundDetails/${ground.ground_id}`}
                       key={ground.ground_id}
+                      className="venueLink"
                     >
                       {ground.photo1 ? (
                         <img
@@ -539,11 +540,12 @@ function WelcomeUser() {
                       <Link
                         to={`/activityDetails/${activity.activity_id}`}
                         key={activity.activity_id}
+                        className="venueLink"
                         style={{ textDecoration: "none", color: "black" }}
                       >
                         {activity.photo1 ? (
                           <img
-                            className="venuePic"
+                            className="groundClubPic"
                             src={activity.photo1}
                             alt="Activity"
                           />

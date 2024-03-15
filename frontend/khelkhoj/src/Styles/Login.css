@@ -62,9 +62,8 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 38%;
+  width: 35%;
   background-color: #fcfaf8;
-  border: 3px solid #cbb89e;
   border-radius: 20px;
   height: 100%;
   margin-top: 1%;
@@ -203,6 +202,7 @@ body {
   height: 24%;
   margin-top: 1%;
   color: black;
+  text-align: center;
   padding: 10px;
   margin-bottom: 8px;
   border: 1px solid #9d7947;

@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useHistory } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   faCalendar,
   faChevronLeft,
   faChevronRight,
+  faCircleArrowLeft,
   faCircleInfo,
   faCircleQuestion,
   faClock,
@@ -13,18 +14,17 @@ import {
   faFlag,
   faIdCard,
   faIndianRupeeSign,
-  faMapLocationDot,
   faMoneyBill,
   faPeopleGroup,
   faPersonRunning,
   faTicketSimple,
-  faUsers,
 } from "@fortawesome/free-solid-svg-icons";
 import logo from "../assets/KhelKhojLogo.png";
 import axios from "axios";
 import defaultGroundPic from "../assets/defaultGround.webp";
 import "../Styles/GroundDetails.css";
 import ActivityModal from "../Components/ActivityModal";
+import Loader from "../Components/Loader";
 
 function ClubActivityDetails() {
   const [ground, setGround] = useState(null);
@@ -32,10 +32,8 @@ function ClubActivityDetails() {
   const [userId, setUserId] = useState("");
   const [inquiries, setInquiries] = useState(null);
   const [showModal, setShowmodal] = useState(false);
+  const navigate = useHistory();
   let { activityId } = useParams();
-  const handleEnquireNow = () => {
-    setShowmodal(true);
-  };
   useEffect(() => {
     axios
       .get(`http://localhost:3001/user/activities/${activityId}`)
@@ -143,9 +141,12 @@ function ClubActivityDetails() {
         // Handle error if status update fails
       });
   };
+  const navigateToHome = () => {
+    navigate.push("/welcomeClub");
+  };
 
   if (!ground) {
-    return <div>Loading...</div>;
+    return <Loader type="club" />;
   }
 
   return (
@@ -188,7 +189,15 @@ function ClubActivityDetails() {
           )}
         </AnimatePresence>
         <div className="leftGroundDetContainer">
-          <h1>{ground.club_name}</h1>
+          <h1>
+            {" "}
+            <FontAwesomeIcon
+              icon={faCircleArrowLeft}
+              className="groundBackButton"
+              onClick={navigateToHome}
+            />{" "}
+            {ground.club_name}
+          </h1>
           <div className="photoContainer">
             <FontAwesomeIcon
               icon={faChevronLeft}

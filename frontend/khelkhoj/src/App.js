@@ -11,7 +11,6 @@ import AddGround from './Pages/AddGround';
 import AddActivities from './Pages/AddActivities';
 import GroundDetails from './Pages/GroundDetails';
 import ActivityDetails from './Pages/ActivityDetails';
-import GroundConfirmation from './Pages/GroundConfirmation';
 import BookingDetails from './Pages/BookingDetails';
 import AllBookings from './Pages/AllBookings';
 import ClubAllBookings from './Pages/ClubAllBookings';
@@ -37,7 +36,6 @@ function App() {
         <Route path="/addGround" component={AddGround} />
         <Route path="/addActivity" component={AddActivities} />
         <Route path="/groundDetails/:groundId" component={GroundDetails} />
-        <Route path="/groundConfirmation" component={GroundConfirmation} />
         <Route path="/bookingDetails/:bookingId" component={BookingDetails} />
         <Route path="/activityDetails/:activityId" component={ActivityDetails} />
         <Route path="/allBookings" component={AllBookings} />

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useHistory } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faChevronLeft,
   faChevronRight,
+  faCircleArrowLeft,
   faCircleInfo,
   faClock,
   faFlag,
@@ -15,11 +16,13 @@ import logo from "../assets/KhelKhojLogo.png";
 import axios from "axios";
 import defaultGroundPic from "../assets/defaultGround.webp";
 import "../Styles/GroundDetails.css";
+import Loader from "../Components/Loader";
 
 function ClubGroundDetails() {
   const [ground, setGround] = useState(null);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [userId, setUserId] = useState("");
+  const navigate = useHistory();
   let { groundId } = useParams();
 
   useEffect(() => {
@@ -51,8 +54,12 @@ function ClubGroundDetails() {
     );
   };
 
+  const navigateToHome = () => {
+    navigate.push("/welcomeClub");
+  };
+
   if (!ground) {
-    return <div>Loading...</div>;
+    return <Loader type="club" />;
   }
 
   return (
@@ -80,7 +87,15 @@ function ClubGroundDetails() {
       </div>
       <div className="mainGroundDetails">
         <div className="leftGroundDetContainer">
-          <h1>{ground.club_name}</h1>
+          <h1>
+            {" "}
+            <FontAwesomeIcon
+              icon={faCircleArrowLeft}
+              className="groundBackButton"
+              onClick={navigateToHome}
+            />{" "}
+            {ground.club_name}
+          </h1>
           <div className="photoContainer">
             <FontAwesomeIcon
               icon={faChevronLeft}

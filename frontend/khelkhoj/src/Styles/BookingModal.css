@@ -13,10 +13,11 @@
   font-family: "Poppins", sans-serif;
   min-height: 48%;
   height: auto;
+  margin-top: 4%;
   padding: 1%;
   border-radius: 10px;
   background-color: #fcfaf8;
-  width: 50%;
+  width: 30%;
   box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 8px;
 }
 

@@ -36,7 +36,7 @@ function FileImageUploader(props) {
             alt="Selected"
             style={{
               marginBottom: "5%",
-              backgroundSize: "contain",
+              backgroundSize: "cover",
               width: "80px",
               height: "80px",
               borderRadius: "50px",

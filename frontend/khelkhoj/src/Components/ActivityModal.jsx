@@ -1,9 +1,10 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import { useHistory } from "react-router-dom";
 import "../Styles/BookingModal.css";
 import "../Styles/ActivityModal.css";
 import { motion } from "framer-motion";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 function ActivityModal(props) {
   const modalRef = useRef();
@@ -21,9 +22,6 @@ function ActivityModal(props) {
   });
 
   const [passwordError, setPasswordError] = useState("");
-  const [successEnquiry, setSuccessEnquiry] = useState("");
-  const [countdown, setCountdown] = useState(5); // Initialize countdown timer
-  const [showCountdown, setShowCountdown] = useState(false); // Track if countdown should be shown
 
   const handleConfirmation = (event) => {
     event.preventDefault();
@@ -35,25 +33,15 @@ function ActivityModal(props) {
       )
       .then((response) => {
         if (response.data.status === "Success") {
-          setSuccessEnquiry(response.data.message);
-          setShowCountdown(true); // Show countdown after successful submission
-
-          let currentCountdown = 5; // Define a variable to store the countdown value
-
-          const countdownInterval = setInterval(() => {
-            currentCountdown -= 1; // Decrement the countdown value
-            setCountdown(currentCountdown); // Update the countdown state
-
-            // Clear interval when countdown reaches 0
-            if (currentCountdown === 0) {
-              clearInterval(countdownInterval);
-              navigate.push("/welcomeUser"); // Redirect to /welcomeUser
-            }
-          }, 1000);
-
-          return () => {
-            clearInterval(countdownInterval); // Cleanup interval on unmount
-          };
+          Swal.fire({
+            title: "Enquiry Submitted!",
+            confirmButtonText: "Home",
+            confirmButtonColor: "#f19006",
+            text: `${props.club_name} will contact with you soon!`,
+            icon: "success",
+          }).then(() => {
+            navigate.push("/welcomeUser");
+          });
         }
       })
       .catch((error) => {
@@ -113,11 +101,6 @@ function ActivityModal(props) {
         </div>
         <div className="errorContainer confirmationError">
           <p className="passwordError">{passwordError}</p>
-          {showCountdown && (
-            <p className="successEnquiry">
-              {successEnquiry}, Redirecting to home in {countdown} seconds
-            </p>
-          )}
         </div>
         <div className="bookConButtonsContainer">
           <div className="bookConButtonCan" onClick={props.onClose}>
