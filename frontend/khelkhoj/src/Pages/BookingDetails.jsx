@@ -17,6 +17,12 @@ function BookingDetails() {
   const [booking, setBooking] = useState(null);
   const [showModal, setShowmodal] = useState(false);
   const [userId, setUserId] = useState("");
+  const [values, setValues] = useState({
+    amount: "",
+    ground_id: "",
+    booking_date: "",
+    booking_start_time: "",
+  });
   useEffect(() => {
     axios.get("http://localhost:3001/user/").then((res) => {
       if (res.data.status === "Success") {
@@ -37,7 +43,6 @@ function BookingDetails() {
         console.error(err);
       });
   }, [bookingId]);
-
   if (!booking) {
     return <Loader type="user" />;
   }
@@ -52,12 +57,24 @@ function BookingDetails() {
     const [hours, minutes] = timeString.split(":");
     return `${hours}:${minutes}`;
   };
+  const bookingDateTime = new Date(
+    `${formattedDate} ${booking.booking_start_time}`
+  );
+  const timeDifference = bookingDateTime - new Date();
   // Calculate duration in minutes
   const durationParts = booking.duration.split(" ");
   const hours = parseInt(durationParts[0]);
   const handleCancelBooking = () => {
     setShowmodal(true);
+    setValues((values) => ({
+      ...values,
+      amount: booking.ground_price * hours,
+      ground_id: booking.ground_id,
+      booking_date: booking.date,
+      booking_start_time: booking.booking_start_time,
+    }));
   };
+  console.log(timeDifference);
   function convertTo12HourFormat(timeString) {
     const [hour, minute] = timeString.split(":");
     const hourInt = parseInt(hour);
@@ -65,13 +82,6 @@ function BookingDetails() {
     const hour12 = hourInt % 12 || 12;
     return `${hour12}:${minute} ${suffix}`;
   }
-  console.log(formattedDate);
-  console.log(booking.booking_start_time);
-  const bookingDateTime = new Date(
-    `${formattedDate} ${booking.booking_start_time}`
-  );
-  const timeDifference = bookingDateTime - new Date();
-  const cancelAllowed = timeDifference > 12 * 60 * 60 * 1000;
   return (
     <div className="containerConfirm">
       <div className="header">
@@ -101,6 +111,9 @@ function BookingDetails() {
             onClose={() => setShowmodal(false)}
             bookingId={bookingId}
             userId={userId}
+            bookingDetails={{
+              values: values,
+            }}
           />
         )}
         <div className="backButtonContainer">
@@ -144,7 +157,8 @@ function BookingDetails() {
           <Link to="/welcomeUser" className="backConfirm">
             Home
           </Link>
-          {cancelAllowed && (
+
+          {timeDifference > 0 && (
             <Link className="cancelBooking" onClick={handleCancelBooking}>
               Cancel
             </Link>

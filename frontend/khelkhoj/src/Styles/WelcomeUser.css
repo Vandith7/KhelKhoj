@@ -21,10 +21,10 @@
 }
 
 .searchBox {
-  width: 64%;
-  height: 22%;
+  width: 500px;
+  height: 14px;
   padding: 14px;
-  margin-right: 10%;
+  /* margin-right: 10%; */
   border: 2px solid #333;
   border-radius: 50px;
   outline: none;
@@ -271,4 +271,41 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.wallet {
+  border-radius: 20px;
+  background-color: #f4efe8;
+  display: flex;
+  align-items: center;
+  font-family: "Poppins", sans-serif;
+  flex-direction: row;
+  padding: 4%;
+  padding-left: 5%;
+  padding-right: 5%;
+  width: auto;
+  cursor: pointer;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 8px;
+}
+
+.walletBalance {
+  display: flex;
+  color: #f99810;
+  flex-wrap: nowrap;
+  flex-direction: row;
+  align-items: center;
+  margin-right: auto;
+  font-weight: 300;
+  font-size: 18px;
+  margin-left: 20px;
+}
+
+.walletLink {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  width: auto;
+  height: 100%;
+  color: #000;
+  text-decoration: none;
 }

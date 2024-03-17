@@ -1,0 +1,126 @@
+.walletPageContainer {
+  width: 100%;
+  min-height: auto;
+  font-family: "Poppins", sans-serif;
+  height: auto;
+}
+
+.addBalanceContainer {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+}
+
+.balanceAddField {
+  width: 10%;
+  transition: all 0.5s ease;
+  margin-left: 6%;
+  padding: 4px;
+  border: 2px solid #cbb89e;
+  border-radius: 10px;
+  outline: none;
+  font-family: "Poppins", sans-serif;
+  font-size: 18px;
+}
+
+.balanceAddField::placeholder {
+  color: #9d7947;
+  font-size: 20px;
+  opacity: 1;
+}
+
+.addAmountButton {
+  width: 10%;
+  cursor: pointer;
+  height: 45px;
+  transition: all 0.5s ease;
+  margin-left: 1%;
+  padding: 4px;
+  border-radius: 8px;
+  color: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f19006;
+  outline: none;
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-size: 18px;
+}
+.addAmountButton:hover {
+  background-color: black;
+  color: #fcfaf8;
+}
+.transactionsContainer {
+  display: flex;
+  justify-content: center;
+}
+
+.transactionsTable {
+  font-family: "Poppins", sans-serif;
+  border-collapse: collapse;
+  width: 94%;
+}
+
+.transactionsTable td,
+.transactionsTable th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.transactionsTable tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.transactionsTable th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #f99810;
+  color: black;
+}
+
+.debitAmount {
+  color: black;
+}
+
+.creditAmount {
+  color: #5cb85c;
+}
+
+.showMoreButton {
+  width: 10%;
+  cursor: pointer;
+  height: 40px;
+  transition: all 0.5s ease;
+  margin-left: 1%;
+  padding: 4px;
+  border-radius: 8px;
+  color: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f19006;
+  outline: none;
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.showMoreButton:hover {
+  background-color: black;
+  color: #fcfaf8;
+}
+
+.showMoreContainer {
+  display: flex;
+  margin-top: 2%;
+  justify-content: center;
+}
+
+.noTransactions {
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

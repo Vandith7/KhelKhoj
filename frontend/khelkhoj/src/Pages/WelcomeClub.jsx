@@ -39,6 +39,7 @@ function WelcomeClub() {
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [showTooltip, setShowTooltip] = useState(false); // State to manage tooltip visibility
   const [bookings, setBookings] = useState(null);
+  const [walletBalance, setWalletBalance] = useState(null);
   const navigate = useHistory();
 
   const handleLogout = () => {
@@ -52,7 +53,23 @@ function WelcomeClub() {
       .catch((err) => console.log(err));
   };
 
+  const fetchWalletBalance = () => {
+    axios
+      .get("http://localhost:3001/club/wallet/balance")
+      .then((res) => {
+        if (res.data.status === "Success") {
+          setWalletBalance(res.data.wallet_balance);
+        } else {
+          console.error("Error fetching wallet balance:", res.data.error);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching wallet balance:", err);
+      });
+  };
+
   useEffect(() => {
+    fetchWalletBalance();
     axios
       .get("http://localhost:3001/club/")
       .then((res) => {
@@ -133,6 +150,23 @@ function WelcomeClub() {
         </Link>
         <div className="nav-links">
           <ul className="ulLink">
+            <motion.li
+              whileTap={{ scale: 0.9 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="wallet"
+            >
+              <Link to="/clubWallet" className="walletLink">
+                <span className="walletBalance">
+                  <FontAwesomeIcon
+                    style={{ fontSize: 18, marginRight: "5px", color: "black" }}
+                    icon={faIndianRupeeSign}
+                  />{" "}
+                  {walletBalance}
+                </span>
+              </Link>
+            </motion.li>
             <li>
               <div className="links">
                 <img

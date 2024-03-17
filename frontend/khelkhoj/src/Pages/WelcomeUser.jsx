@@ -7,6 +7,7 @@ import defaultGroundPic from "../assets/defaultGround.webp";
 import notFound from "../assets/not-found.webp";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { motion } from "framer-motion";
+import Fuse from "fuse.js";
 import {
   faCalendarDays,
   faLocationDot,
@@ -22,6 +23,7 @@ import {
   faPeopleGroup,
   faTicketAlt,
   faCalendarXmark,
+  faWallet,
 } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import Greeting from "../Components/Greetings";
@@ -39,6 +41,7 @@ function WelcomeUser() {
   const [longitude, setLongitude] = useState(null);
   const [searchQuery, setSearchQuery] = useState(""); // State to store longitude
   const [bookings, setBookings] = useState(null);
+  const [walletBalance, setWalletBalance] = useState(null);
   const navigate = useHistory();
 
   function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -72,7 +75,20 @@ function WelcomeUser() {
       return null;
     }
   }
-
+  const fetchWalletBalance = () => {
+    axios
+      .get("http://localhost:3001/user/wallet/balance")
+      .then((res) => {
+        if (res.data.status === "Success") {
+          setWalletBalance(res.data.balance);
+        } else {
+          console.error("Error fetching wallet balance:", res.data.error);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching wallet balance:", err);
+      });
+  };
   // Define the getDistanceBetweenLocations function
   const getDistanceBetweenLocations = useCallback(
     (groundUrl, userLat, userLong) => {
@@ -92,42 +108,28 @@ function WelcomeUser() {
     []
   );
 
-  // Function to handle search input change
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value);
   };
 
-  // Function to filter grounds/activities based on search query
   const filterResults = (items) => {
-    return items.filter((item) => {
-      if (
-        item.club_name &&
-        item.club_name.toLowerCase().includes(searchQuery.toLowerCase())
-      ) {
-        return true;
-      }
-      if (
-        item.type &&
-        item.type.toLowerCase().includes(searchQuery.toLowerCase())
-      ) {
-        return true;
-      }
-      if (
-        item.activity_name &&
-        item.activity_name.toLowerCase().includes(searchQuery.toLowerCase())
-      ) {
-        return true;
-      }
-      if (
-        item.category &&
-        item.category.toLowerCase().includes(searchQuery.toLowerCase())
-      ) {
-        return true;
-      }
-      return false; // Return false if none of the conditions match
-    });
-  };
+    if (!searchQuery.trim()) {
+      return items;
+    }
 
+    const options = {
+      keys: ["club_name", "type", "activity_name", "category"],
+      threshold: 0.5, // Adjust threshold as per your preference
+      includeScore: true,
+      findAllMatches: true,
+    };
+
+    const fuse = new Fuse(items, options);
+
+    const result = fuse.search(searchQuery);
+
+    return result.map((item) => item.item);
+  };
   const handleLogout = () => {
     axios
       .get("http://localhost:3001/user/logout")
@@ -141,6 +143,7 @@ function WelcomeUser() {
   console.log(activities);
 
   useEffect(() => {
+    fetchWalletBalance();
     function sortGroundsByDistance(grounds) {
       if (latitude !== null && longitude !== null) {
         grounds.sort((a, b) => {
@@ -257,6 +260,24 @@ function WelcomeUser() {
             ></input>
           </div>
           <ul className="ulLink">
+            <motion.li
+              whileTap={{ scale: 0.9 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="wallet"
+            >
+              <Link to="/wallet" className="walletLink">
+                <FontAwesomeIcon style={{ fontSize: 18 }} icon={faWallet} />
+                <span className="walletBalance">
+                  <FontAwesomeIcon
+                    style={{ fontSize: 18, marginRight: "5px", color: "black" }}
+                    icon={faIndianRupeeSign}
+                  />{" "}
+                  {walletBalance}
+                </span>
+              </Link>
+            </motion.li>
             <li>
               <Link to="/updateUser" className="links">
                 <img
@@ -266,6 +287,7 @@ function WelcomeUser() {
                 />
               </Link>
             </li>
+
             <li
               className="logoutButton"
               onMouseEnter={() => setShowTooltip(true)} // Show tooltip on mouse enter

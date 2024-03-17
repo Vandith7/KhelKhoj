@@ -530,4 +530,65 @@ router.post('/updateInquiryStatus/:inquiryId', (req, res) => {
     });
 });
 
+// Club Wallet Route
+router.get('/wallet/balance', verifyClub, (req, res) => {
+    const club_id = req.clubData.club_id;
+
+    // Check if club's wallet exists
+    const checkWalletQuery = 'SELECT * FROM club_wallet WHERE club_id = ?';
+
+    // Execute the query
+    db.query(checkWalletQuery, [club_id], (err, results) => {
+        if (err) {
+            console.error("Error checking club wallet:", err);
+            return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+        }
+
+        if (results.length === 0) {
+            // If club's wallet doesn't exist, create one
+            const createWalletQuery = 'INSERT INTO club_wallet (club_id, balance) VALUES (?, 0)';
+            db.query(createWalletQuery, [club_id], (createErr, createResult) => {
+                if (createErr) {
+                    console.error("Error creating club wallet:", createErr);
+                    return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+                }
+
+                // Wallet created successfully, return balance as 0
+                res.json({ status: "Success", wallet_balance: 0 });
+            });
+        } else {
+            // Club's wallet exists, retrieve the balance
+            const walletBalance = results[0].balance;
+            res.json({ status: "Success", wallet_balance: walletBalance });
+        }
+    });
+});
+
+router.get('/transactions', verifyClub, (req, res) => {
+    const clubId = req.clubData.club_id;
+
+    // Query to retrieve transactions along with operation and user name
+    const getTransactionsQuery = `
+        SELECT wt.transaction_id, wt.transaction_type, wt.operation, wt.amount, wt.transaction_time, wt.related_type, 
+               u.name AS user_name
+        FROM wallet_transactions wt
+        LEFT JOIN users u ON wt.user_id = u.user_id
+        WHERE wt.club_id = ? AND wt.related_type='club'`;
+
+    // Execute the query
+    db.query(getTransactionsQuery, [clubId], (err, results) => {
+        if (err) {
+            console.error("Error fetching transactions:", err);
+            return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+        }
+
+        // Send the retrieved transactions data as JSON response
+        res.json({ status: "Success", transactions: results });
+    });
+});
+
+
+
+
+
 module.exports = router;

@@ -4,7 +4,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
-const db = require('../db')
+const db = require('../db');
+const moment = require('moment');
 
 
 const salt = 10;
@@ -348,12 +349,103 @@ router.get('/activities/:activityId', (req, res) => {
     });
 });
 
+const checkUserBalance = (userId, amount, callback) => {
+    const getUserBalanceQuery = `
+        SELECT balance FROM user_wallet
+        WHERE user_id = ?`;
+    db.query(getUserBalanceQuery, [userId], (error, result) => {
+        if (error) {
+            console.error("Error checking user balance:", error);
+            return callback(error, null);
+        }
+        const userBalance = result[0].balance;
+        if (userBalance >= amount) {
+            callback(null, true); // Sufficient balance
+        } else {
+            callback(null, false); // Insufficient balance
+        }
+    });
+};
+// Function to update user wallet
+const updateUserWallet = (userId, amount, callback) => {
+    const updateUserWalletQuery = `
+        UPDATE user_wallet
+        SET balance = balance - ?
+        WHERE user_id = ?`;
+    db.query(updateUserWalletQuery, [amount, userId], (error, result) => {
+        if (error) {
+            console.error("Error updating user wallet:", error);
+            return callback(error, null);
+        }
+        callback(null, result);
+    });
+};
+
+// Function to update club wallet
+const updateClubWallet = (groundId, amount, callback) => {
+    const updateClubWalletQuery = `
+        UPDATE club_wallet
+        SET balance = balance + ?
+        WHERE club_id = (SELECT club_id FROM grounds WHERE ground_id = ?)`;
+    db.query(updateClubWalletQuery, [amount, groundId], (error, result) => {
+        if (error) {
+            console.error("Error updating club wallet:", error);
+            return callback(error, null);
+        }
+        callback(null, result);
+    });
+};
+
+const refundUserWallet = (userId, amount, callback) => {
+    console.log("User " + amount)
+    const updateUserWalletQuery = `
+        UPDATE user_wallet
+        SET balance = balance + ?
+        WHERE user_id = ?`;
+    db.query(updateUserWalletQuery, [amount, userId], (error, result) => {
+        if (error) {
+            console.error("Error updating user wallet:", error);
+            return callback(error, null);
+        }
+        callback(null, result);
+    });
+};
+
+const refundClubWallet = (groundId, amount, callback) => {
+    console.log("Club " + amount)
+    const updateClubWalletQuery = `
+        UPDATE club_wallet
+        SET balance = balance - ?
+        WHERE club_id = (SELECT club_id FROM grounds WHERE ground_id = ?)`;
+    db.query(updateClubWalletQuery, [amount, groundId], (error, result) => {
+        if (error) {
+            console.error("Error updating club wallet:", error);
+            return callback(error, null);
+        }
+        callback(null, result);
+    });
+};
+
+const addTransaction = (transactionType, operation, amount, club_id, user_id, relatedType, callback) => {
+    const addTransactionQuery = `
+        INSERT INTO wallet_transactions 
+        (transaction_type, operation, amount, club_id, user_id,related_type) 
+        VALUES (?, ?, ?, ?, ?, ?)`;
+    db.query(addTransactionQuery, [transactionType, operation, amount, club_id, user_id, relatedType], (error, result) => {
+        if (error) {
+            console.error("Error adding transaction:", error);
+            return callback(error, null);
+        }
+        callback(null, result);
+    });
+};
 
 
-// User Ground Booking Route
+// Assuming addTransaction function is imported or defined here
+
 router.post('/grounds/:groundId/book', (req, res) => {
     const { groundId } = req.params;
-    const { userId, date, startTime, endTime } = req.body;
+    const { userId, date, startTime, endTime, amount } = req.body;
 
     // Get current time
     const currentTime = new Date().toISOString().split('T')[1].split('.')[0];
@@ -363,65 +455,423 @@ router.post('/grounds/:groundId/book', (req, res) => {
         return res.status(400).json({ status: "Error", error: "Cannot book past time slots for today" });
     }
 
-    // Begin a database transaction
-    db.beginTransaction(function (err) {
-        if (err) {
-            console.error("Error beginning transaction:", err);
+    // Check user balance before proceeding with booking
+    checkUserBalance(userId, amount, (checkUserBalanceErr, sufficientBalance) => {
+        if (checkUserBalanceErr) {
             return res.status(500).json({ status: "Error", error: "Internal Server Error" });
         }
 
-        // Check if the slot spans across two different dates
-        let adjustedEndTime = endTime;
-        if (startTime > endTime) {
-            adjustedEndTime = '23:59:59'; // End time for the current date
+        if (!sufficientBalance) {
+            return res.status(400).json({ status: "Error", error: "Insufficient balance in your wallet" });
         }
 
-        // Check if the requested time slot is available
-        const availabilityQuery = `SELECT * FROM bookings 
-                                   WHERE ground_id = ? 
-                                   AND date = ? 
-                                   AND ((booking_start_time < ? AND booking_end_time > ?) 
-                                        OR (booking_start_time < ? AND booking_end_time > ?) 
-                                        OR (booking_start_time >= ? AND booking_end_time <= ?)) FOR UPDATE`;
-
-        db.query(availabilityQuery, [groundId, date, startTime, adjustedEndTime, startTime, adjustedEndTime, startTime, adjustedEndTime], (availabilityErr, availabilityResult) => {
-            if (availabilityErr) {
-                console.error("Error checking availability:", availabilityErr);
-                return db.rollback(function () {
-                    res.status(500).json({ status: "Error", error: "Internal Server Error" });
-                });
+        // Begin a database transaction
+        db.beginTransaction(function (err) {
+            if (err) {
+                console.error("Error beginning transaction:", err);
+                return res.status(500).json({ status: "Error", error: "Internal Server Error" });
             }
 
-            // If there are overlapping bookings, rollback transaction and return "Slot not available"
-            if (availabilityResult.length > 0) {
-                // If there are overlapping bookings, send response and return to exit the function
-                return res.status(400).json({ error: "No slots available for specified time" });
-            }
-
-            // If the slot is available, insert a new booking record
-            const insertQuery = `INSERT INTO bookings (ground_id, user_id, date, booking_start_time, booking_end_time) 
-                                 VALUES (?, ?, ?, ?, ?)`;
-
-            db.query(insertQuery, [groundId, userId, date, startTime, endTime], (insertErr, insertResult) => {
-                if (insertErr) {
-                    console.error("Error booking ground slot:", insertErr);
+            // Fetch clubId using groundId
+            const fetchClubIdQuery = `SELECT club_id FROM grounds WHERE ground_id = ?`;
+            db.query(fetchClubIdQuery, [groundId], (fetchClubIdErr, fetchClubIdResult) => {
+                if (fetchClubIdErr) {
+                    console.error("Error fetching clubId:", fetchClubIdErr);
                     return db.rollback(function () {
-                        res.status(500).json({ error: "Internal Server Error" });
+                        res.status(500).json({ status: "Error", error: "Internal Server Error" });
                     });
                 }
-                // Commit transaction if everything is successful
-                db.commit(function (commitErr) {
-                    if (commitErr) {
-                        console.error("Error committing transaction:", commitErr);
+
+                const clubId = fetchClubIdResult[0].club_id;
+
+                // Check if the slot spans across two different dates
+                let adjustedEndTime = endTime;
+                if (startTime > endTime) {
+                    adjustedEndTime = '23:59:59'; // End time for the current date
+                }
+
+                // Check if the requested time slot is available
+                const availabilityQuery = `SELECT * FROM bookings 
+                                           WHERE ground_id = ? 
+                                           AND date = ? 
+                                           AND ((booking_start_time < ? AND booking_end_time > ?) 
+                                                OR (booking_start_time < ? AND booking_end_time > ?) 
+                                                OR (booking_start_time >= ? AND booking_end_time <= ?)) FOR UPDATE`;
+
+                db.query(availabilityQuery, [groundId, date, startTime, adjustedEndTime, startTime, adjustedEndTime, startTime, adjustedEndTime], (availabilityErr, availabilityResult) => {
+                    if (availabilityErr) {
+                        console.error("Error checking availability:", availabilityErr);
                         return db.rollback(function () {
-                            res.status(500).json({ error: "Internal Server Error" });
+                            res.status(500).json({ status: "Error", error: "Internal Server Error" });
                         });
                     }
-                    return res.json({ status: "Success", message: "Ground slot booked successfully" });
+
+                    // If there are overlapping bookings, rollback transaction and return "Slot not available"
+                    if (availabilityResult.length > 0) {
+                        // If there are overlapping bookings, send response and return to exit the function
+                        return res.status(400).json({ error: "No slots available for specified time" });
+                    }
+
+                    // If the slot is available, insert a new booking record
+                    const insertQuery = `INSERT INTO bookings (ground_id, user_id, date, booking_start_time, booking_end_time) 
+                                         VALUES (?, ?, ?, ?, ?)`;
+
+                    db.query(insertQuery, [groundId, userId, date, startTime, endTime], (insertErr, insertResult) => {
+                        if (insertErr) {
+                            console.error("Error booking ground slot:", insertErr);
+                            return db.rollback(function () {
+                                res.status(500).json({ error: "Internal Server Error" });
+                            });
+                        }
+
+                        // Update User Wallet
+                        updateUserWallet(userId, amount, (updateUserWalletErr, updateUserWalletResult) => {
+                            if (updateUserWalletErr) {
+                                return db.rollback(function () {
+                                    res.status(500).json({ error: "Internal Server Error" });
+                                });
+                            }
+
+                            // Add transaction record for User Wallet
+                            const userTransactionType = 'debit';
+                            const userOperation = 'booking';
+                            const userRelatedType = 'user';
+
+                            addTransaction(userTransactionType, userOperation, amount, clubId, userId, userRelatedType, (userTransactionErr, userTransactionResult) => {
+                                if (userTransactionErr) {
+                                    return db.rollback(function () {
+                                        res.status(500).json({ error: "Internal Server Error" });
+                                    });
+                                }
+
+                                // Update Club Wallet
+                                updateClubWallet(groundId, amount, (updateClubWalletErr, updateClubWalletResult) => {
+                                    if (updateClubWalletErr) {
+                                        // Since the booking was successful but there was an error updating club wallet,
+                                        // consider rolling back the user wallet update or handling this scenario appropriately
+                                        return db.rollback(function () {
+                                            res.status(500).json({ error: "Internal Server Error" });
+                                        });
+                                    }
+
+                                    // Add transaction record for Club Wallet
+                                    const clubTransactionType = 'credit';
+                                    const clubOperation = 'booking';
+                                    const clubRelatedType = 'club';
+
+                                    addTransaction(clubTransactionType, clubOperation, amount, clubId, userId, clubRelatedType, (clubTransactionErr, clubTransactionResult) => {
+                                        if (clubTransactionErr) {
+                                            return db.rollback(function () {
+                                                res.status(500).json({ error: "Internal Server Error" });
+                                            });
+                                        }
+
+                                        // Commit transaction if everything is successful
+                                        db.commit(function (commitErr) {
+                                            if (commitErr) {
+                                                console.error("Error committing transaction:", commitErr);
+                                                return db.rollback(function () {
+                                                    res.status(500).json({ error: "Internal Server Error" });
+                                                });
+                                            }
+                                            return res.json({ status: "Success", message: "Ground slot booked successfully" });
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    });
                 });
             });
-
         });
+    });
+});
+
+
+
+
+// User Cancel Booking Route
+// Assuming addTransaction function is imported or defined here
+
+router.post('/bookings/:bookingId/cancel', verifyUser, (req, res) => {
+    const bookingId = req.params.bookingId;
+    const userId = req.userData.user_id;
+    const groundId = req.body.ground_id;
+    const refundAmount = req.body.amount;
+    const bookingDate = moment(req.body.booking_date);
+    const bookingStartTime = moment(req.body.booking_start_time, "HH:mm:ss");
+    const currentDate = moment();
+    const combinedDateTime = moment({
+        year: bookingDate.year(),
+        month: bookingDate.month(),
+        date: bookingDate.date(),
+        hour: bookingStartTime.hour(),
+        minute: bookingStartTime.minute(),
+        second: bookingStartTime.second()
+    });
+
+    const hoursDifference = Math.abs(currentDate.diff(combinedDateTime, 'hours'));
+
+    console.log("Difference in hours:", hoursDifference);
+    let refundPercentage;
+
+    // Determine refund percentage based on hoursDifference
+    if (hoursDifference >= 24) {
+        refundPercentage = 1; // 100%
+    } else if (hoursDifference < 24 && hoursDifference > 12) {
+        refundPercentage = 0.75; // 75%
+    } else if (hoursDifference <= 12 && hoursDifference > 6) {
+        refundPercentage = 0.5; // 50%
+    } else if (hoursDifference <= 6) {
+        refundPercentage = 0.25; // 25%
+    }
+
+    // Calculate the refund amount
+    const actualRefundAmount = refundAmount * refundPercentage;
+    // Fetch clubId using groundId
+    const fetchClubIdQuery = `SELECT club_id FROM grounds WHERE ground_id = ?`;
+    db.query(fetchClubIdQuery, [groundId], (fetchClubIdErr, fetchClubIdResult) => {
+        if (fetchClubIdErr) {
+            console.error("Error fetching clubId:", fetchClubIdErr);
+            return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+        }
+
+        const clubId = fetchClubIdResult[0].club_id;
+
+        // Check if the booking belongs to the user
+        const checkOwnershipQuery = 'SELECT * FROM bookings WHERE booking_id = ? AND user_id = ?';
+        db.query(checkOwnershipQuery, [bookingId, userId], (checkErr, checkResults) => {
+            if (checkErr) {
+                console.error("Error checking ownership:", checkErr);
+                return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+            }
+
+            if (checkResults.length === 0) {
+                return res.status(403).json({ status: "Error", error: "You are not authorized to cancel this booking" });
+            }
+
+            // Begin a database transaction
+            db.beginTransaction(function (cancelErr) {
+                if (cancelErr) {
+                    console.error("Error beginning transaction:", cancelErr);
+                    return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+                }
+
+                // Refund the amount to the user
+                refundUserWallet(userId, actualRefundAmount, (updateUserWalletErr) => {
+                    if (updateUserWalletErr) {
+                        return db.rollback(function () {
+                            res.status(500).json({ status: "Error", error: "Internal Server Error" });
+                        });
+                    }
+
+                    // Update club wallet (if needed)
+                    // Ensure to pass correct parameters to updateClubWallet function
+                    refundClubWallet(groundId, actualRefundAmount, (updateClubWalletErr) => {
+                        if (updateClubWalletErr) {
+                            // Rollback transaction if club wallet update fails
+                            return db.rollback(function () {
+                                res.status(500).json({ status: "Error", error: "Internal Server Error" });
+                            });
+                        }
+
+                        // Delete the booking record
+                        const cancelQuery = 'DELETE FROM bookings WHERE booking_id = ?';
+                        db.query(cancelQuery, [bookingId], (cancelErr, cancelResults) => {
+                            if (cancelErr) {
+                                console.error("Error canceling booking:", cancelErr);
+                                return db.rollback(function () {
+                                    res.status(500).json({ status: "Error", error: "Internal Server Error" });
+                                });
+                            }
+
+                            // Add transaction record for User Wallet
+                            const userTransactionType = 'credit';
+                            const userOperation = 'cancellation';
+                            const userRelatedType = 'user';
+
+                            addTransaction(userTransactionType, userOperation, actualRefundAmount, clubId, userId, userRelatedType, (userTransactionErr, userTransactionResult) => {
+                                if (userTransactionErr) {
+                                    return db.rollback(function () {
+                                        res.status(500).json({ status: "Error", error: "Internal Server Error" });
+                                    });
+                                }
+
+                                // Add transaction record for Club Wallet
+                                const clubTransactionType = 'debit';
+                                const clubOperation = 'cancellation';
+                                const clubRelatedType = 'club';
+
+                                addTransaction(clubTransactionType, clubOperation, actualRefundAmount, clubId, userId, clubRelatedType, (clubTransactionErr, clubTransactionResult) => {
+                                    if (clubTransactionErr) {
+                                        return db.rollback(function () {
+                                            res.status(500).json({ status: "Error", error: "Internal Server Error" });
+                                        });
+                                    }
+
+                                    // Commit transaction if everything is successful
+                                    db.commit(function (commitErr) {
+                                        if (commitErr) {
+                                            console.error("Error committing transaction:", commitErr);
+                                            return db.rollback(function () {
+                                                res.status(500).json({ status: "Error", error: "Internal Server Error" });
+                                            });
+                                        }
+                                        return res.json({ status: "Success", message: "Booking cancelled successfully. Refunded amount: ₹" + actualRefundAmount });
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    });
+});
+
+
+
+router.get('/wallet/balance', verifyUser, (req, res) => {
+    const userId = req.userData.user_id;
+
+    // Query to retrieve wallet balance for the user
+    const getBalanceQuery = 'SELECT balance FROM user_wallet WHERE user_id = ?';
+
+    // Execute the query
+    db.query(getBalanceQuery, [userId], (err, results) => {
+        if (err) {
+            console.error("Error fetching wallet balance:", err);
+            return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+        }
+
+        if (results.length === 0) {
+            // If no wallet record exists, create one with initial balance 0
+            const createWalletQuery = 'INSERT INTO user_wallet (user_id, balance) VALUES (?, 0)';
+            db.query(createWalletQuery, [userId], (createErr, createResult) => {
+                if (createErr) {
+                    console.error("Error creating wallet:", createErr);
+                    return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+                }
+
+                res.json({ status: "Success", balance: 0 });
+            });
+        } else {
+            // Wallet record exists, return the balance
+            const balance = results[0].balance;
+            res.json({ status: "Success", balance });
+        }
+    });
+});
+
+// Assuming addTransaction function is imported or defined here
+
+router.post('/wallet/add', verifyUser, (req, res) => {
+    const userId = req.userData.user_id;
+    const { amount } = req.body;
+
+    // Validate amount
+    if (!amount || isNaN(amount) || amount <= 0) {
+        return res.status(400).json({ status: "Error", error: "Invalid amount" });
+    }
+
+    // Query to retrieve the current wallet balance
+    const getBalanceQuery = 'SELECT balance FROM user_wallet WHERE user_id = ?';
+
+    // Execute the query to get the current balance
+    db.query(getBalanceQuery, [userId], (balanceErr, balanceResults) => {
+        if (balanceErr) {
+            console.error("Error fetching wallet balance:", balanceErr);
+            return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+        }
+
+        // Check if balance results are available and contain a valid balance
+        if (!balanceResults || !balanceResults[0] || isNaN(balanceResults[0].balance)) {
+            return res.status(500).json({ status: "Error", error: "Invalid wallet balance data" });
+        }
+
+        // Retrieve the current balance
+        const currentBalance = parseFloat(balanceResults[0].balance);
+
+        // Check if current balance is a valid number
+        if (isNaN(currentBalance)) {
+            return res.status(500).json({ status: "Error", error: "Invalid wallet balance data" });
+        }
+
+        // Calculate the new balance after adding the amount
+        const newBalance = currentBalance + parseFloat(amount);
+
+        // Check if the new balance would exceed the limit of 10000
+        if (newBalance > 10000) {
+            return res.status(400).json({ status: "Error", error: "The maximum limit for your wallet balance is 10,000." });
+        }
+
+        // Begin a database transaction
+        db.beginTransaction(function (err) {
+            if (err) {
+                console.error("Error beginning transaction:", err);
+                return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+            }
+
+            // Query to add amount to user's wallet
+            const addAmountQuery = 'UPDATE user_wallet SET balance = balance + ? WHERE user_id = ?';
+
+            // Execute the query to add the amount to the wallet
+            db.query(addAmountQuery, [amount, userId], (addErr, addResults) => {
+                if (addErr) {
+                    console.error("Error adding amount to wallet:", addErr);
+                    return db.rollback(function () {
+                        res.status(500).json({ status: "Error", error: "Internal Server Error" });
+                    });
+                }
+
+                // Add transaction record for wallet addition
+                const transactionType = 'credit';
+                const operation = 'recharge';
+                const related_type = 'user';
+
+                addTransaction(transactionType, operation, amount, null, userId, related_type, (transactionErr, transactionResult) => {
+                    if (transactionErr) {
+                        return db.rollback(function () {
+                            res.status(500).json({ status: "Error", error: "Internal Server Error" });
+                        });
+                    }
+
+                    // Commit transaction if everything is successful
+                    db.commit(function (commitErr) {
+                        if (commitErr) {
+                            console.error("Error committing transaction:", commitErr);
+                            return db.rollback(function () {
+                                res.status(500).json({ status: "Error", error: "Internal Server Error" });
+                            });
+                        }
+                        return res.json({ status: "Success", message: "Amount added to wallet successfully" });
+                    });
+                });
+            });
+        });
+    });
+});
+
+router.get('/transactions', verifyUser, (req, res) => {
+    const userId = req.userData.user_id;
+
+    // Query to retrieve transactions along with operation and club name
+    const getTransactionsQuery = `
+        SELECT wt.transaction_id, wt.transaction_type, wt.operation, wt.amount, wt.transaction_time, wt.related_type, 
+               c.name AS club_name
+        FROM wallet_transactions wt
+        LEFT JOIN clubs c ON wt.club_id = c.club_id
+        WHERE wt.user_id = ? AND wt.related_type='user'`;
+
+    // Execute the query
+    db.query(getTransactionsQuery, [userId], (err, results) => {
+        if (err) {
+            console.error("Error fetching transactions:", err);
+            return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+        }
+
+        // Send the retrieved transactions data as JSON response
+        res.json({ status: "Success", transactions: results });
     });
 });
 
@@ -511,36 +961,6 @@ router.get('/bookings/:bookingId', verifyUser, (req, res) => {
         return res.json({ status: "Success", booking });
     });
 });
-// User Cancel Booking Route
-router.post('/bookings/:bookingId/cancel', verifyUser, (req, res) => {
-    const bookingId = req.params.bookingId;
-    const userId = req.userData.user_id;
-
-    // Check if the booking belongs to the user
-    const checkOwnershipQuery = 'SELECT * FROM bookings WHERE booking_id = ? AND user_id = ?';
-    db.query(checkOwnershipQuery, [bookingId, userId], (checkErr, checkResults) => {
-        if (checkErr) {
-            console.error("Error checking ownership:", checkErr);
-            return res.status(500).json({ status: "Error", error: "Internal Server Error" });
-        }
-
-        if (checkResults.length === 0) {
-            return res.status(403).json({ status: "Error", error: "You are not authorized to cancel this booking" });
-        }
-
-        // If the booking belongs to the user, proceed with cancellation
-        const cancelQuery = 'DELETE FROM bookings WHERE booking_id = ?';
-        db.query(cancelQuery, [bookingId], (cancelErr, cancelResults) => {
-            if (cancelErr) {
-                console.error("Error canceling booking:", cancelErr);
-                return res.status(500).json({ status: "Error", error: "Internal Server Error" });
-            }
-
-            return res.json({ status: "Success", message: "Booking canceled successfully" });
-        });
-    });
-});
-
 
 router.post('/updateProfile', verifyUser, upload.single('profile_photo'), (req, res) => {
     const userId = req.userData.user_id;
@@ -646,6 +1066,7 @@ router.post('/activities/:activityId/enquiry', verifyUser, (req, res) => {
         return res.json({ status: "Success", message: "Activity enquiry submitted successfully" });
     });
 });
+
 
 
 

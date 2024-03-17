@@ -7,6 +7,7 @@ import axios from "axios";
 import Swal from "sweetalert2";
 
 function CancelModal(props) {
+  const { values } = props.bookingDetails;
   const modalRef = useRef();
   const closeModal = (e) => {
     if (modalRef.current === e.target) {
@@ -17,7 +18,6 @@ function CancelModal(props) {
     password: "",
     userId: props.userId,
   });
-  console.log(value);
   const navigate = useHistory();
   const [passwordError, setPasswordError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -33,22 +33,17 @@ function CancelModal(props) {
         if (res.data.status === "Success") {
           axios
             .post(
-              `http://localhost:3001/user/bookings/${props.bookingId}/cancel`
+              `http://localhost:3001/user/bookings/${props.bookingId}/cancel`,
+              values
             )
             .then((res) => {
               if (res.data.status === "Success") {
                 // navigate.push("/welcomeUser");
                 Swal.fire({
                   title: "Ground Booking Cancelled!",
+                  text: `${res.data.message}`,
                   confirmButtonText: "Home",
                   confirmButtonColor: "#f19006",
-                  // text: `Gear up for some ${ground.type} action at ${
-                  //   ground.club_name
-                  // } from ${convertTo12HourFormat(
-                  //   values.startTime
-                  // )} to ${convertTo12HourFormat(
-                  //   values.endTime
-                  // )} on ${formatDate(values.date)}!`,
                   icon: "success",
                 }).then(() => {
                   navigate.push("/welcomeUser");

@@ -38,8 +38,12 @@ function BookingModal(props) {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", options);
   }
-  const { values, ground } = props.bookingDetails;
-
+  const { values, ground, duration } = props.bookingDetails;
+  const bookingData = {
+    ...values,
+    amount: duration * ground.price, // Include the amount in the booking data
+  };
+  console.log(bookingData);
   const handleConfirmation = (event) => {
     event.preventDefault();
     axios
@@ -49,7 +53,7 @@ function BookingModal(props) {
           axios
             .post(
               `http://localhost:3001/user/grounds/${values.groundId}/book`,
-              values
+              bookingData
             )
             .then((response) => {
               if (response.data.status === "Success") {
@@ -75,6 +79,22 @@ function BookingModal(props) {
               const errorMessage = error.response.data.error;
               if (errorMessage.includes("slots")) {
                 setPasswordError(errorMessage);
+              } else if (errorMessage.includes("balance")) {
+                Swal.fire({
+                  title: "Insufficient balance in your wallet!",
+                  text: `Additional wallet balance required to continue.`,
+                  showDenyButton: true,
+                  confirmButtonText: "Add balance",
+                  denyButtonText: `No thanks`,
+                  confirmButtonColor: "#f19006",
+                  icon: "warning",
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    navigate.push("/wallet");
+                  } else if (result.isDenied) {
+                    return;
+                  }
+                });
               }
             });
         }

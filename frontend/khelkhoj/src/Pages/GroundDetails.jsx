@@ -42,6 +42,7 @@ function GroundDetails() {
     date: "",
     startTime: "",
     endTime: "",
+    amount: "",
   });
   const today = new Date();
   const maxDate = new Date();
