@@ -274,7 +274,7 @@ function WelcomeUser() {
                     style={{ fontSize: 18, marginRight: "5px", color: "black" }}
                     icon={faIndianRupeeSign}
                   />{" "}
-                  {walletBalance}
+                  <div style={{ fontWeight: "600" }}>{walletBalance}</div>
                 </span>
               </Link>
             </motion.li>
@@ -311,7 +311,7 @@ function WelcomeUser() {
           transition={{ delay: 0.1 }}
           className="leftBar"
         >
-          <h2 style={{ color: "#000" }}>
+          <h2 style={{ color: "#000", fontWeight: "600" }}>
             <FontAwesomeIcon
               style={{ fontSize: 24, marginRight: "5%", color: "#000" }}
               icon={faCalendarDays}
@@ -323,8 +323,9 @@ function WelcomeUser() {
               bookings
                 .filter(
                   (booking) =>
+                    booking.status === "confirmed" && // Filter out canceled bookings
                     new Date(`${booking.date}T${booking.booking_end_time}`) >
-                    new Date()
+                      new Date()
                 ) // Filter out bookings whose end time has passed
                 .sort((a, b) => {
                   const dateComparison = new Date(a.date) - new Date(b.date);
@@ -340,8 +341,9 @@ function WelcomeUser() {
                 bookings
                   .filter(
                     (booking) =>
+                      booking.status === "confirmed" && // Filter out canceled bookings
                       new Date(`${booking.date}T${booking.booking_end_time}`) >
-                      new Date()
+                        new Date()
                   )
                   .sort((a, b) => {
                     const dateComparison = new Date(a.date) - new Date(b.date);
@@ -362,11 +364,11 @@ function WelcomeUser() {
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.5 }}
                       className="cardsLeft"
+                      key={booking.booking_id}
                     >
                       <Link
                         style={{ textDecoration: "none", color: "black" }}
                         to={`/bookingDetails/${booking.booking_id}`}
-                        key={booking.booking_id}
                       >
                         <h2 className="venueLeft">
                           <FontAwesomeIcon
@@ -456,11 +458,11 @@ function WelcomeUser() {
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.5 }}
                     className="venueCard"
+                    key={ground.ground_id}
                   >
                     <Link
                       style={{ textDecoration: "none", color: "black" }}
                       to={`/groundDetails/${ground.ground_id}`}
-                      key={ground.ground_id}
                       className="venueLink"
                     >
                       {ground.photo1 ? (
@@ -558,10 +560,10 @@ function WelcomeUser() {
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.5 }}
                       className="activityCard"
+                      key={activity.activity_id}
                     >
                       <Link
                         to={`/activityDetails/${activity.activity_id}`}
-                        key={activity.activity_id}
                         className="venueLink"
                         style={{ textDecoration: "none", color: "black" }}
                       >

@@ -269,7 +269,7 @@ router.get('/bookings', verifyClub, (req, res) => {
     const club_id = req.clubData.club_id;
     const currentDate = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
 
-    const sql = `SELECT b.booking_id, DATE_FORMAT(b.date, '%Y-%m-%d') AS date,g.type AS ground_type, b.booking_start_time, b.booking_end_time, u.name AS user_name
+    const sql = `SELECT b.booking_id, DATE_FORMAT(b.date, '%Y-%m-%d') AS date,g.type AS ground_type,b.status, b.booking_start_time, b.booking_end_time, u.name AS user_name
                  FROM bookings AS b
                  INNER JOIN grounds AS g ON b.ground_id = g.ground_id
                  INNER JOIN clubs AS c ON g.club_id = c.club_id
@@ -281,7 +281,6 @@ router.get('/bookings', verifyClub, (req, res) => {
             console.error("Error fetching user's bookings:", err);
             return res.status(500).json({ status: "Error", error: "Internal Server Error" });
         }
-
         res.json({ status: "Success", bookings: results });
     });
 });

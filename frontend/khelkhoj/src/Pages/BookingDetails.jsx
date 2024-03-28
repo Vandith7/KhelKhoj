@@ -74,7 +74,7 @@ function BookingDetails() {
       booking_start_time: booking.booking_start_time,
     }));
   };
-  console.log(timeDifference);
+
   function convertTo12HourFormat(timeString) {
     const [hour, minute] = timeString.split(":");
     const hourInt = parseInt(hour);
@@ -129,41 +129,77 @@ function BookingDetails() {
             Booking details
           </h3>
         </div>
-        <h1 className="conMessage">Your booking is confirmed!</h1>
-        <h3 style={{ fontWeight: "500" }}>{booking.ground_type}</h3>
-        <h3 style={{ fontWeight: "500" }}>
-          <FontAwesomeIcon
-            style={{ height: "14px", fontWeight: "400" }}
-            icon={faIndianRupeeSign}
-          />{" "}
-          {booking.ground_price * hours}{" "}
-          {/* Multiply price by total duration in minutes */}
-        </h3>
-        <h3 style={{ fontWeight: "500" }}>
-          Gear up for some sports action at {booking.club_name} from{" "}
-          {convertTo12HourFormat(formatTime(booking.booking_start_time))} to{" "}
-          {convertTo12HourFormat(formatTime(booking.booking_end_time))} on{" "}
-          {formattedDate}!
-        </h3>
-        <a
-          className="groundAddress"
-          href={booking.club_address}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          View on Google Maps
-        </a>
-        <div className="backConfirmContainer">
-          <Link to="/welcomeUser" className="backConfirm">
-            Home
-          </Link>
+        {booking.status === "cancelled" ? (
+          <>
+            <h1 className="conMessage">Your booking is cancelled!</h1>
+            <h3 style={{ fontWeight: "500" }}>{booking.ground_type}</h3>
+            <h3 style={{ fontWeight: "500" }}>
+              <FontAwesomeIcon
+                style={{ height: "14px", fontWeight: "400" }}
+                icon={faIndianRupeeSign}
+              />{" "}
+              {booking.ground_price * hours}{" "}
+              {/* Multiply price by total duration in minutes */}
+            </h3>
+            <h3 style={{ fontWeight: "500" }}>
+              Your booking at {booking.club_name} from{" "}
+              {convertTo12HourFormat(formatTime(booking.booking_start_time))} to{" "}
+              {convertTo12HourFormat(formatTime(booking.booking_end_time))} on{" "}
+              {formattedDate} has been cancelled successfully!
+            </h3>
+            <a
+              className="groundAddress"
+              href={booking.club_address}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View on Google Maps
+            </a>
+            <div className="backConfirmContainer">
+              <Link to="/welcomeUser" className="backConfirm">
+                Home
+              </Link>
+            </div>
+          </>
+        ) : (
+          <>
+            <h1 className="conMessage">Your booking is confirmed!</h1>
+            <h3 style={{ fontWeight: "500" }}>{booking.ground_type}</h3>
+            <h3 style={{ fontWeight: "500" }}>
+              <FontAwesomeIcon
+                style={{ height: "14px", fontWeight: "400" }}
+                icon={faIndianRupeeSign}
+              />{" "}
+              {booking.ground_price * hours}{" "}
+              {/* Multiply price by total duration in minutes */}
+            </h3>
+            <h3 style={{ fontWeight: "500" }}>
+              Gear up for some sports action at {booking.club_name} from{" "}
+              {convertTo12HourFormat(formatTime(booking.booking_start_time))} to{" "}
+              {convertTo12HourFormat(formatTime(booking.booking_end_time))} on{" "}
+              {formattedDate}!
+            </h3>
+            <a
+              className="groundAddress"
+              href={booking.club_address}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View on Google Maps
+            </a>
+            <div className="backConfirmContainer">
+              <Link to="/welcomeUser" className="backConfirm">
+                Home
+              </Link>
 
-          {timeDifference > 0 && (
-            <Link className="cancelBooking" onClick={handleCancelBooking}>
-              Cancel
-            </Link>
-          )}
-        </div>
+              {timeDifference > 0 && booking.status !== "cancelled" && (
+                <Link className="cancelBooking" onClick={handleCancelBooking}>
+                  Cancel
+                </Link>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

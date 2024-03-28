@@ -25,6 +25,7 @@ import {
   faCalendarXmark,
   faUser,
   faEye,
+  faArrowTrendUp,
 } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import ClubGreetings from "../Components/ClubGreetings";
@@ -74,42 +75,39 @@ function WelcomeClub() {
       .get("http://localhost:3001/club/")
       .then((res) => {
         if (res.data.status === "Success") {
-          setAuth(true);
-
           if (!hasName) {
             setName(res.data.name);
             setHasName(true);
-          }
-          if (res.data.status === "Success") {
-            const clubId = res.data.club_id;
-            console.log(clubId + "clubid");
-            axios
-              .get(`http://localhost:3001/club/activities/${clubId}`)
-              .then((res) => {
-                if (res.data.status === "Success") {
-                  setActivities(res.data.activities);
-                }
-              })
-              .catch((err) => {
-                console.error(err);
-              });
-            axios.get(`http://localhost:3001/club/bookings/`).then((res) => {
-              if (res.data.status === "Success") {
-                setBookings(res.data.bookings);
-              }
-            });
-            axios
-              .get(`http://localhost:3001/club/grounds/${clubId}`) // Update the endpoint to accept club_id
-              .then((res) => {
-                if (res.data.status === "Success") {
-                  setGrounds(res.data.grounds); // Assuming your API response contains grounds data
-                }
-              });
           }
           if (res.data.profile_photo) {
             setProfilePhoto(res.data.profile_photo);
             console.log(res.data);
           }
+          const clubId = res.data.club_id;
+          console.log(clubId + "clubid");
+          axios
+            .get(`http://localhost:3001/club/activities/${clubId}`)
+            .then((res) => {
+              if (res.data.status === "Success") {
+                setActivities(res.data.activities);
+              }
+            })
+            .catch((err) => {
+              console.error(err);
+            });
+          axios.get(`http://localhost:3001/club/bookings/`).then((res) => {
+            if (res.data.status === "Success") {
+              setBookings(res.data.bookings);
+            }
+          });
+          axios
+            .get(`http://localhost:3001/club/grounds/${clubId}`) // Update the endpoint to accept club_id
+            .then((res) => {
+              if (res.data.status === "Success") {
+                setGrounds(res.data.grounds); // Assuming your API response contains grounds data
+              }
+            });
+          setAuth(true); // Move this line here to avoid infinite loop
           navigate.push("/welcomeClub");
         } else {
           setAuth(false);
@@ -118,7 +116,7 @@ function WelcomeClub() {
       .catch((err) => {
         console.error(err);
       });
-  }, [auth, navigate, hasName]);
+  }, [hasName, navigate]);
   function convertTo12HourFormat(timeString) {
     const [hour, minute] = timeString.split(":");
     const hourInt = parseInt(hour);
@@ -158,12 +156,16 @@ function WelcomeClub() {
               className="wallet"
             >
               <Link to="/clubWallet" className="walletLink">
+                <FontAwesomeIcon
+                  style={{ fontSize: 18 }}
+                  icon={faArrowTrendUp}
+                />
                 <span className="walletBalance">
                   <FontAwesomeIcon
                     style={{ fontSize: 18, marginRight: "5px", color: "black" }}
                     icon={faIndianRupeeSign}
                   />{" "}
-                  {walletBalance}
+                  <div style={{ fontWeight: "600" }}>{walletBalance}</div>
                 </span>
               </Link>
             </motion.li>
@@ -199,7 +201,7 @@ function WelcomeClub() {
           transition={{ delay: 0.1 }}
           className="leftBar"
         >
-          <h2 style={{ color: "black" }}>
+          <h2 style={{ color: "#000", fontWeight: "600" }}>
             <FontAwesomeIcon
               style={{ fontSize: 24, marginRight: "5%" }}
               icon={faCalendarDays}
@@ -212,8 +214,9 @@ function WelcomeClub() {
               bookings
                 .filter(
                   (booking) =>
+                    booking.status === "confirmed" &&
                     new Date(`${booking.date}T${booking.booking_end_time}`) >
-                    new Date()
+                      new Date()
                 )
                 .sort((a, b) => {
                   const dateComparison = new Date(a.date) - new Date(b.date);
@@ -230,8 +233,9 @@ function WelcomeClub() {
                 bookings
                   .filter(
                     (booking) =>
+                      booking.status === "confirmed" &&
                       new Date(`${booking.date}T${booking.booking_end_time}`) >
-                      new Date()
+                        new Date()
                   )
                   .sort((a, b) => {
                     const dateComparison = new Date(a.date) - new Date(b.date);
@@ -326,12 +330,12 @@ function WelcomeClub() {
                       animate={{ opacity: 1 }}
                       className="groundClubCard"
                       transition={{ duration: 0.5 }}
+                      key={ground.ground_id}
                     >
                       <Link
                         className="venueLink"
                         style={{ color: "black", textDecoration: "none" }}
                         to={`/clubGroundDetails/${ground.ground_id}`}
-                        key={ground.ground_id}
                       >
                         {ground.photo1 && (
                           <img
@@ -427,13 +431,13 @@ function WelcomeClub() {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.5 }}
+                      key={activity.activity_id}
                     >
                       {" "}
                       <Link
                         className="venueLink"
                         style={{ color: "black", textDecoration: "none" }}
                         to={`/clubActivityDetails/${activity.activity_id}`}
-                        key={activity.activity_id}
                       >
                         <li
                           key={activity.activity_id}

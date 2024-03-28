@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Link, useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 import logo from "../assets/KhelKhojLogo.png";
 import axios from "axios";
-import Swal from "sweetalert2";
 import "../Styles/Wallet.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faIndianRupeeSign } from "@fortawesome/free-solid-svg-icons";
@@ -11,8 +10,6 @@ function ClubWallet() {
   const [walletBalance, setWalletBalance] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [visibleTransactions, setVisibleTransactions] = useState(5); // State to manage visible transactions
-
-  const navigate = useHistory();
 
   const fetchWalletBalance = () => {
     axios

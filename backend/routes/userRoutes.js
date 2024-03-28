@@ -494,6 +494,7 @@ router.post('/grounds/:groundId/book', (req, res) => {
                 const availabilityQuery = `SELECT * FROM bookings 
                                            WHERE ground_id = ? 
                                            AND date = ? 
+                                           AND status='confirmed'
                                            AND ((booking_start_time < ? AND booking_end_time > ?) 
                                                 OR (booking_start_time < ? AND booking_end_time > ?) 
                                                 OR (booking_start_time >= ? AND booking_end_time <= ?)) FOR UPDATE`;
@@ -676,7 +677,8 @@ router.post('/bookings/:bookingId/cancel', verifyUser, (req, res) => {
                         }
 
                         // Delete the booking record
-                        const cancelQuery = 'DELETE FROM bookings WHERE booking_id = ?';
+                        const cancelQuery = `UPDATE bookings SET status = 'cancelled' WHERE booking_id = ?`;
+
                         db.query(cancelQuery, [bookingId], (cancelErr, cancelResults) => {
                             if (cancelErr) {
                                 console.error("Error canceling booking:", cancelErr);
@@ -881,7 +883,7 @@ router.get('/grounds/:groundId/bookings', (req, res) => {
     const groundId = req.params.groundId;
     const date = req.query.date;
 
-    const sql = `SELECT * FROM bookings WHERE ground_id = ? AND date = ?`;
+    const sql = `SELECT * FROM bookings WHERE ground_id = ? AND date = ? AND status='confirmed'`;
 
     db.query(sql, [groundId, date], (err, results) => {
         if (err) {
@@ -897,7 +899,7 @@ router.get('/getBookings', verifyUser, (req, res) => {
     const user_id = req.userData.user_id;
     const currentDate = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
 
-    const sql = `SELECT b.booking_id, DATE_FORMAT(b.date, '%Y-%m-%d') AS date, b.booking_start_time, b.booking_end_time, g.club_id, g.ground_id, g.type AS ground_type, c.name AS club_name
+    const sql = `SELECT b.booking_id, DATE_FORMAT(b.date, '%Y-%m-%d') AS date, b.booking_start_time, b.booking_end_time, b.status,g.club_id, g.ground_id, g.type AS ground_type, c.name AS club_name
                  FROM bookings AS b
                  INNER JOIN grounds AS g ON b.ground_id = g.ground_id
                  INNER JOIN clubs AS c ON g.club_id = c.club_id

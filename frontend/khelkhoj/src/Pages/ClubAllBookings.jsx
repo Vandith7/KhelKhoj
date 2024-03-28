@@ -16,6 +16,7 @@ import axios from "axios";
 function ClubAllBookings() {
   const [upcomingBookings, setUpcomingBookings] = useState([]);
   const [pastBookings, setPastBookings] = useState([]);
+  const [cancelledBookings, setCancelledBookings] = useState([]);
 
   function formatDate(dateString) {
     const options = { day: "numeric", month: "short", year: "numeric" };
@@ -24,7 +25,7 @@ function ClubAllBookings() {
   }
 
   useEffect(() => {
-    axios.get(`http://localhost:3001/club/bookings/`).then((res) => {
+    axios.get(`http://localhost:3001/club/bookings`).then((res) => {
       if (res.data.status === "Success") {
         const sortedBookings = res.data.bookings.sort((a, b) => {
           const dateComparison =
@@ -38,21 +39,27 @@ function ClubAllBookings() {
           const bookingDate = new Date(
             booking.date + "T" + booking.booking_start_time
           );
-          return bookingDate >= today;
+          return bookingDate >= today && booking.status === "confirmed";
         });
 
         const past = sortedBookings.filter((booking) => {
           const bookingDate = new Date(
             booking.date + "T" + booking.booking_start_time
           );
-          return bookingDate < today;
+          return bookingDate < today && booking.status === "confirmed";
+        });
+
+        const cancelledBookings = sortedBookings.filter((booking) => {
+          return booking.status === "cancelled";
         });
 
         setUpcomingBookings(upcoming);
         setPastBookings(past);
+        setCancelledBookings(cancelledBookings);
       }
     });
   }, []);
+  console.log(cancelledBookings);
   function convertTo12HourFormat(timeString) {
     const [hour, minute] = timeString.split(":");
     const hourInt = parseInt(hour);
@@ -193,6 +200,57 @@ function ClubAllBookings() {
                 />
                 <h3>No past bookings</h3>
               </div>
+            </div>
+          )}
+        </div>
+        <h1 style={{ marginLeft: "1%" }}>Cancelled bookings</h1>
+        <div className="groundBookingContainer">
+          {cancelledBookings && cancelledBookings.length > 0 ? (
+            cancelledBookings.map((cancelledBooking) => (
+              <motion.div
+                whileTap={{ scale: 0.9 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="allBookingCards"
+                key={cancelledBooking.booking_id}
+              >
+                <h2 className="allBookingName">
+                  <FontAwesomeIcon
+                    style={{ fontSize: 18, marginRight: "2%" }}
+                    icon={faUser}
+                  />
+                  {cancelledBooking.user_name}{" "}
+                </h2>
+                <p>
+                  <FontAwesomeIcon
+                    style={{ fontSize: 15, marginRight: "2%" }}
+                    icon={faCalendarDay}
+                  />
+                  {formatDate(cancelledBooking.date)}
+                </p>
+                <p>
+                  <FontAwesomeIcon
+                    style={{ fontSize: 15, marginRight: "2%" }}
+                    icon={faClock}
+                  />
+                  {convertTo12HourFormat(
+                    cancelledBooking.booking_start_time.slice(0, 5)
+                  )}{" "}
+                  to{" "}
+                  {convertTo12HourFormat(
+                    cancelledBooking.booking_end_time.slice(0, 5)
+                  )}
+                </p>
+              </motion.div>
+            ))
+          ) : (
+            <div className="noAllBookings">
+              <FontAwesomeIcon
+                style={{ fontSize: 55, marginRight: "2%" }}
+                icon={faCalendarXmark}
+              />
+              <h3>No cancelled bookings</h3>
             </div>
           )}
         </div>
