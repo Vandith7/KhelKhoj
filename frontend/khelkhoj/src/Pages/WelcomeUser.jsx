@@ -24,6 +24,7 @@ import {
   faTicketAlt,
   faCalendarXmark,
   faWallet,
+  faChartSimple,
 } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import Greeting from "../Components/Greetings";
@@ -146,7 +147,20 @@ function WelcomeUser() {
     fetchWalletBalance();
     function sortGroundsByDistance(grounds) {
       if (latitude !== null && longitude !== null) {
-        grounds.sort((a, b) => {
+        const popularGrounds = [];
+        const remainingGrounds = [];
+
+        // Splitting popular grounds and remaining grounds
+        grounds.forEach((ground) => {
+          if (ground.popular !== undefined && popularGrounds.length < 3) {
+            popularGrounds.push(ground);
+          } else {
+            remainingGrounds.push(ground);
+          }
+        });
+
+        // Sorting remaining grounds by distance
+        remainingGrounds.sort((a, b) => {
           const distanceA = getDistanceBetweenLocations(
             a.address,
             latitude,
@@ -157,12 +171,20 @@ function WelcomeUser() {
             latitude,
             longitude
           );
+
+          if (distanceA === null && distanceB === null) return 0;
           if (distanceA === null) return 1;
           if (distanceB === null) return -1;
+
           return distanceA - distanceB;
         });
+
+        // Combining popular and remaining grounds
+        const sortedGrounds = [...popularGrounds, ...remainingGrounds];
+        return sortedGrounds;
+      } else {
+        return grounds;
       }
-      return grounds;
     }
 
     if (navigator.geolocation) {
@@ -271,11 +293,25 @@ function WelcomeUser() {
                 <FontAwesomeIcon style={{ fontSize: 18 }} icon={faWallet} />
                 <span className="walletBalance">
                   <FontAwesomeIcon
-                    style={{ fontSize: 18, marginRight: "5px", color: "black" }}
+                    style={{ fontSize: 18, marginRight: "1px", color: "black" }}
                     icon={faIndianRupeeSign}
                   />{" "}
-                  <div style={{ fontWeight: "600" }}>{walletBalance}</div>
+                  <div style={{ fontWeight: "600" }}> {walletBalance}</div>
                 </span>
+              </Link>
+            </motion.li>
+            <motion.li
+              whileTap={{ scale: 0.9 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="stats"
+            >
+              <Link to="/userStats" className="statsLink">
+                <FontAwesomeIcon
+                  style={{ fontSize: 18 }}
+                  icon={faChartSimple}
+                />
               </Link>
             </motion.li>
             <li>
@@ -450,7 +486,7 @@ function WelcomeUser() {
                   <p style={{ marginTop: "320px" }}>No grounds available</p>
                 </div>
               ) : (
-                filterResults(grounds).map((ground) => (
+                filterResults(grounds).map((ground, index) => (
                   <motion.div
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.9 }}
@@ -461,9 +497,9 @@ function WelcomeUser() {
                     key={ground.ground_id}
                   >
                     <Link
-                      style={{ textDecoration: "none", color: "black" }}
                       to={`/groundDetails/${ground.ground_id}`}
                       className="venueLink"
+                      style={{ textDecoration: "none", color: "black" }}
                     >
                       {ground.photo1 ? (
                         <img
@@ -477,6 +513,11 @@ function WelcomeUser() {
                           src={defaultGroundPic}
                           alt="Default Ground"
                         />
+                      )}{" "}
+                      {ground.popular && (
+                        <div className="popular">
+                          No. {index + 1} in Popularity
+                        </div>
                       )}
                       <h3 style={{ marginLeft: "2%", color: "#F99810" }}>
                         <FontAwesomeIcon
@@ -498,7 +539,6 @@ function WelcomeUser() {
                             ) * 1.5
                           )} km)`}
                       </h3>
-
                       <p>
                         <FontAwesomeIcon
                           style={{ fontSize: 15, marginRight: "2%" }}

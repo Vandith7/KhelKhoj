@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
 const db = require('../db');
+const moment = require('moment');
 
 const salt = 10;
 const clubTokenSecretKey = "club-jwt-secret-key";
@@ -583,6 +584,157 @@ router.get('/transactions', verifyClub, (req, res) => {
 
         // Send the retrieved transactions data as JSON response
         res.json({ status: "Success", transactions: results });
+    });
+});
+
+
+router.get('/stats', verifyClub, (req, res) => {
+    const clubId = req.clubData.club_id;
+    const { timePeriod } = req.query;
+
+    if (!timePeriod) {
+        return res.status(400).json({ status: 'Error', error: 'Time period is required' });
+    }
+
+    let startDate;
+    switch (timePeriod) {
+        case '1week':
+            startDate = moment().subtract(1, 'weeks').format('YYYY-MM-DD');
+            break;
+        case '1month':
+            startDate = moment().subtract(1, 'months').format('YYYY-MM-DD');
+            break;
+        case '3months':
+            startDate = moment().subtract(3, 'months').format('YYYY-MM-DD');
+            break;
+        case '6months':
+            startDate = moment().subtract(6, 'months').format('YYYY-MM-DD');
+            break;
+        case '1year':
+            startDate = moment().subtract(1, 'years').format('YYYY-MM-DD');
+            break;
+        default:
+            return res.status(400).json({ status: 'Error', error: 'Invalid time period' });
+    }
+
+    const sqlTotalConfirmedBookings = `
+        SELECT COUNT(*) AS totalConfirmedBookings
+        FROM bookings b
+        INNER JOIN grounds g ON b.ground_id = g.ground_id
+        WHERE g.club_id = ? AND b.status = 'confirmed' AND b.date >= ?;
+    `;
+
+    const sqlTotalCancelledBookings = `
+        SELECT COUNT(*) AS totalCancelledBookings
+        FROM bookings b
+        INNER JOIN grounds g ON b.ground_id = g.ground_id
+        WHERE g.club_id = ? AND b.status = 'cancelled' AND b.date >= ?;
+    `;
+
+    const sqlTotalSlotsSpent = `
+        SELECT SUM(TIMESTAMPDIFF(HOUR, b.booking_start_time, b.booking_end_time)) AS totalSlotsSpent
+        FROM bookings b
+        INNER JOIN grounds g ON b.ground_id = g.ground_id
+        WHERE g.club_id = ? AND b.date >= ? AND b.status='confirmed';
+    `;
+
+    const sqlTotalIncomeGenerated = `
+        SELECT SUM(TIMESTAMPDIFF(HOUR, b.booking_start_time, b.booking_end_time) * g.price) AS totalIncomeGenerated
+        FROM bookings b
+        INNER JOIN grounds g ON b.ground_id = g.ground_id
+        WHERE g.club_id = ? AND b.date >= ? AND b.status='confirmed';
+    `;
+
+    const sqlMostBookedGroundType = `
+        SELECT g.type AS mostBookedGroundType
+        FROM grounds g
+        JOIN (
+            SELECT ground_id, COUNT(*) AS booking_count
+            FROM bookings
+            WHERE ground_id IN (
+                SELECT ground_id FROM grounds WHERE club_id = ?
+            ) AND status = 'confirmed'
+            GROUP BY ground_id
+            ORDER BY booking_count DESC
+            LIMIT 1
+        ) AS b ON g.ground_id = b.ground_id;
+    `;
+
+    const sqlMostBookedTimeSlot = `
+        SELECT TIME(b.booking_start_time) AS mostBookedTimeSlot
+        FROM bookings b
+        INNER JOIN grounds g ON b.ground_id = g.ground_id
+        WHERE g.club_id = ?
+        GROUP BY TIME(b.booking_start_time)
+        ORDER BY COUNT(*) DESC
+        LIMIT 1;
+    `;
+
+    const sqlMostBookedUser = `
+        SELECT u.user_id, u.name, COUNT(*) AS totalBookings
+        FROM users u
+        INNER JOIN bookings b ON u.user_id = b.user_id
+        INNER JOIN grounds g ON b.ground_id = g.ground_id
+        WHERE g.club_id = ? AND b.status = 'confirmed'
+        GROUP BY u.user_id
+        ORDER BY totalBookings DESC
+        LIMIT 1;
+    `;
+
+    db.query(sqlTotalConfirmedBookings, [clubId, startDate], (err, results1) => {
+        if (err) {
+            console.error("Error fetching total confirmed bookings:", err);
+            return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+        }
+        db.query(sqlTotalCancelledBookings, [clubId, startDate], (err, results2) => {
+            if (err) {
+                console.error("Error fetching total cancelled bookings:", err);
+                return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+            }
+            db.query(sqlTotalSlotsSpent, [clubId, startDate], (err, results3) => {
+                if (err) {
+                    console.error("Error fetching total slots spent:", err);
+                    return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+                }
+                db.query(sqlTotalIncomeGenerated, [clubId, startDate], (err, results4) => {
+                    if (err) {
+                        console.error("Error fetching total income generated:", err);
+                        return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+                    }
+                    db.query(sqlMostBookedGroundType, [clubId], (err, results5) => {
+                        if (err) {
+                            console.error("Error fetching most booked ground type:", err);
+                            return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+                        }
+                        db.query(sqlMostBookedTimeSlot, [clubId], (err, results6) => {
+                            if (err) {
+                                console.error("Error fetching most booked time slot:", err);
+                                return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+                            }
+                            db.query(sqlMostBookedUser, [clubId], (err, results7) => {
+                                if (err) {
+                                    console.error("Error fetching most booked user:", err);
+                                    return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+                                }
+
+                                // Combine all results and send response
+                                const statistics = {
+                                    totalConfirmedBookings: results1[0].totalConfirmedBookings,
+                                    totalCancelledBookings: results2[0].totalCancelledBookings,
+                                    totalSlotsSpent: results3[0].totalSlotsSpent,
+                                    totalIncomeGenerated: results4[0].totalIncomeGenerated,
+                                    mostBookedGroundType: results5.length ? results5[0].mostBookedGroundType : null,
+                                    mostBookedTimeSlot: results6.length ? results6[0].mostBookedTimeSlot : null,
+                                    mostBookedUser: results6.length ? results7[0] : null
+                                };
+                                console.log(statistics)
+                                res.json({ status: "Success", statistics });
+                            });
+                        });
+                    });
+                });
+            });
+        });
     });
 });
 

@@ -21,6 +21,8 @@ import ClubActivityDetails from './Pages/ClubActivityDetails';
 import UpdateActivity from './Pages/UpdateActivity';
 import Wallet from './Pages/Wallet';
 import ClubWallet from './Pages/ClubWallet';
+import UserStats from './Pages/UserStats';
+import ClubStats from './Pages/ClubStats';
 
 function App() {
   return (
@@ -48,7 +50,9 @@ function App() {
         <Route path="/clubGroundDetails/:groundId" component={ClubGroundDetails} />
         <Route path="/clubActivityDetails/:activityId" component={ClubActivityDetails} />
         <Route path="/wallet" component={Wallet} />
-        <Route paath="/clubWallet" component={ClubWallet} />
+        <Route path="/clubWallet" component={ClubWallet} />
+        <Route path="/userStats" component={UserStats} />
+        <Route path="/clubStats" component={ClubStats} />
       </Switch>
 
     </Router>

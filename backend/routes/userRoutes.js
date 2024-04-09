@@ -168,9 +168,9 @@ router.get('/logout', (req, res) => {
     res.clearCookie('user_token');
     return res.json({ status: "Success" });
 });
-
 router.get('/grounds', (req, res) => {
-    const sql = `SELECT 
+    const sql = `
+    SELECT 
         g.ground_id, 
         g.type, 
         g.description,
@@ -182,10 +182,20 @@ router.get('/grounds', (req, res) => {
         g.photo1,
         g.photo2,
         g.photo3,
-        g.photo4
-    FROM grounds AS g
-    INNER JOIN clubs AS c ON g.club_id = c.club_id
-    WHERE g.visibility = 1`; // Add condition to filter visible grounds only
+        g.photo4,
+        COUNT(CASE WHEN b.status='confirmed' THEN b.booking_id END) AS popularityCount
+    FROM 
+        grounds AS g
+    INNER JOIN 
+        clubs AS c ON g.club_id = c.club_id
+    LEFT JOIN 
+        bookings AS b ON g.ground_id = b.ground_id
+    WHERE 
+        g.visibility = 1
+    GROUP BY 
+        g.ground_id
+    ORDER BY 
+        popularityCount DESC`;
 
     db.query(sql, (err, results) => {
         if (err) {
@@ -193,17 +203,24 @@ router.get('/grounds', (req, res) => {
             return res.status(500).json({ status: "Error", error: "Internal Server Error" });
         }
 
-        const groundsWithPhotos = results.map(ground => ({
+        const grounds = results.map(ground => ({
             ...ground,
             photo1: ground.photo1 ? ground.photo1.toString() : null,
             photo2: ground.photo2 ? ground.photo2.toString() : null,
             photo3: ground.photo3 ? ground.photo3.toString() : null,
-            photo4: ground.photo4 ? ground.photo4.toString() : null
+            photo4: ground.photo4 ? ground.photo4.toString() : null,
+            popular: false // Initialize popular flag for each ground
         }));
 
-        res.json({ status: "Success", grounds: groundsWithPhotos });
+        // Mark top 3 grounds as popular
+        grounds.slice(0, 3).forEach(ground => {
+            ground.popular = true;
+        });
+
+        res.json({ status: "Success", grounds });
     });
 });
+
 
 router.get('/activities', (req, res) => {
     const currentDate = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
@@ -1066,6 +1083,169 @@ router.post('/activities/:activityId/enquiry', verifyUser, (req, res) => {
             return res.status(500).json({ error: "Internal Server Error" });
         }
         return res.json({ status: "Success", message: "Activity enquiry submitted successfully" });
+    });
+});
+
+
+router.get('/stats', verifyUser, (req, res) => {
+    const userId = req.userData.user_id;
+    const { timePeriod } = req.query; // Retrieve timePeriod from query parameters
+
+    // Ensure timePeriod is provided
+    if (!timePeriod) {
+        return res.status(400).json({ status: 'Error', error: 'Time period is required' });
+    }
+
+    let startDate;
+    switch (timePeriod) {
+        case '1week':
+            startDate = moment().subtract(1, 'weeks').format('YYYY-MM-DD');
+            break;
+        case '1month':
+            startDate = moment().subtract(1, 'months').format('YYYY-MM-DD');
+            break;
+        case '3months':
+            startDate = moment().subtract(3, 'months').format('YYYY-MM-DD');
+            break;
+        case '6months':
+            startDate = moment().subtract(6, 'months').format('YYYY-MM-DD');
+            break;
+        case '1year':
+            startDate = moment().subtract(1, 'years').format('YYYY-MM-DD');
+            break;
+        default:
+            return res.status(400).json({ status: 'Error', error: 'Invalid time period' });
+    }
+
+    // SQL queries to fetch user statistics based on the selected time period
+    const sqlTotalConfirmedBookings = `
+        SELECT COUNT(*) AS totalConfirmedBookings
+        FROM bookings
+        WHERE user_id = ? AND status = 'confirmed' AND date >= ?;
+    `;
+
+    const sqlTotalCancelledBookings = `
+        SELECT COUNT(*) AS totalCancelledBookings
+        FROM bookings
+        WHERE user_id = ? AND status = 'cancelled' AND date >= ?;
+    `;
+
+    const sqlTotalSlotsSpent = `
+        SELECT SUM(TIMESTAMPDIFF(HOUR, booking_start_time, booking_end_time)) AS totalSlotsSpent
+        FROM bookings
+        WHERE user_id = ? AND date >= ? AND status='confirmed';
+    `;
+
+    const sqlTotalAmountSpent = `
+    SELECT SUM(TIMESTAMPDIFF(HOUR, booking_start_time, booking_end_time) * price) AS totalAmountSpent
+    FROM bookings
+    INNER JOIN grounds ON bookings.ground_id = grounds.ground_id
+    WHERE user_id = ? AND date >= ?
+    AND status = 'confirmed'; 
+`;
+
+
+
+    const sqlFavouriteGroundType = `
+    SELECT g.type
+    FROM grounds g
+    JOIN (
+        SELECT ground_id, COUNT(*) AS booking_count
+        FROM bookings
+        WHERE user_id = ?
+        GROUP BY ground_id
+        ORDER BY booking_count DESC
+        LIMIT 1
+    ) AS b ON g.ground_id = b.ground_id;
+`;
+
+
+    const sqlFavouriteClub = `
+    SELECT c.name AS favouriteClub
+    FROM clubs c
+    JOIN (
+        SELECT club_id, COUNT(*) AS booking_count
+        FROM bookings
+        INNER JOIN grounds ON bookings.ground_id = grounds.ground_id
+        WHERE user_id = ?
+        GROUP BY club_id
+        ORDER BY booking_count DESC
+        LIMIT 1
+    ) AS b ON c.club_id = b.club_id;
+`;
+
+    const sqlFavouriteTimeSlot = `
+    SELECT TIME(booking_start_time) AS favouriteTimeSlot
+    FROM bookings
+    WHERE user_id = ?
+    GROUP BY TIME(booking_start_time)
+    ORDER BY COUNT(*) DESC
+    LIMIT 1;
+`;
+
+
+
+
+    // Execute all SQL queries
+    db.query(sqlTotalConfirmedBookings, [userId, startDate], (err, results1) => {
+        if (err) {
+            console.error("Error fetching total confirmed bookings:", err);
+            return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+        }
+
+        db.query(sqlTotalCancelledBookings, [userId, startDate], (err, results2) => {
+            if (err) {
+                console.error("Error fetching total cancelled bookings:", err);
+                return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+            }
+
+            db.query(sqlTotalSlotsSpent, [userId, startDate], (err, results3) => {
+                if (err) {
+                    console.error("Error fetching total slots spent:", err);
+                    return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+                }
+
+                db.query(sqlTotalAmountSpent, [userId, startDate], (err, results4) => {
+                    if (err) {
+                        console.error("Error fetching total amount spent:", err);
+                        return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+                    }
+
+                    db.query(sqlFavouriteGroundType, [userId], (err, results5) => {
+                        if (err) {
+                            console.error("Error fetching favourite ground type:", err);
+                            return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+                        }
+
+                        db.query(sqlFavouriteClub, [userId], (err, results6) => {
+                            if (err) {
+                                console.error("Error fetching favourite club:", err);
+                                return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+                            }
+
+                            db.query(sqlFavouriteTimeSlot, [userId], (err, results7) => {
+                                if (err) {
+                                    console.error("Error fetching favourite time slot:", err);
+                                    return res.status(500).json({ status: "Error", error: "Internal Server Error" });
+                                }
+
+                                // Combine all results and send response
+                                const statistics = {
+                                    totalConfirmedBookings: results1[0].totalConfirmedBookings,
+                                    totalCancelledBookings: results2[0].totalCancelledBookings,
+                                    totalSlotsSpent: results3[0].totalSlotsSpent,
+                                    totalAmountSpent: results4[0].totalAmountSpent,
+                                    favouriteGroundType: results5.length ? results5[0].type : null,
+                                    favouriteClub: results6.length ? results6[0].favouriteClub : null,
+                                    favouriteTimeSlot: results7.length ? results7[0].favouriteTimeSlot : null
+                                };
+                                res.json({ status: "Success", statistics });
+                            });
+                        });
+                    });
+                });
+            });
+        });
     });
 });
 

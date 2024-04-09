@@ -25,7 +25,8 @@ import {
   faCalendarXmark,
   faUser,
   faEye,
-  faArrowTrendUp,
+  faMoneyBills,
+  faChartSimple,
 } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import ClubGreetings from "../Components/ClubGreetings";
@@ -156,10 +157,7 @@ function WelcomeClub() {
               className="wallet"
             >
               <Link to="/clubWallet" className="walletLink">
-                <FontAwesomeIcon
-                  style={{ fontSize: 18 }}
-                  icon={faArrowTrendUp}
-                />
+                <FontAwesomeIcon style={{ fontSize: 18 }} icon={faMoneyBills} />
                 <span className="walletBalance">
                   <FontAwesomeIcon
                     style={{ fontSize: 18, marginRight: "5px", color: "black" }}
@@ -167,6 +165,20 @@ function WelcomeClub() {
                   />{" "}
                   <div style={{ fontWeight: "600" }}>{walletBalance}</div>
                 </span>
+              </Link>
+            </motion.li>
+            <motion.li
+              whileTap={{ scale: 0.9 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="stats"
+            >
+              <Link to="/clubStats" className="statsLink">
+                <FontAwesomeIcon
+                  style={{ fontSize: 18 }}
+                  icon={faChartSimple}
+                />
               </Link>
             </motion.li>
             <li>
@@ -189,7 +201,6 @@ function WelcomeClub() {
                 icon={faRightFromBracket}
               />
               {showTooltip && <div className="tooltip">Logout</div>}{" "}
-              {/* Show tooltip if state is true */}
             </li>
           </ul>
         </div>
