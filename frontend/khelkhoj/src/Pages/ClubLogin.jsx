@@ -149,6 +149,9 @@ function ClubLogin() {
               {emailError && <p className="error">{emailError}</p>}
             </div>
             <button className="loginButton">Log In</button>
+            <Link to="/clubPass" className="forgotPassLink">
+              <>Forgot Password?</>
+            </Link>
           </form>
           <div className="orDiv">
             <p>or</p>

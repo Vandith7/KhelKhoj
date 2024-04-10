@@ -16,6 +16,7 @@ function UserRegister() {
     password: "",
     conPassword: "",
     profile_photo: null,
+    otp: "",
   });
 
   const [passwordError, setPasswordError] = useState("");
@@ -23,10 +24,49 @@ function UserRegister() {
   const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [nameError, setNameError] = useState("");
+  const [otpError, setOTPError] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
   console.log(values);
 
   const handleImageChange = (imageBlob) => {
     setValues({ ...values, profile_photo: imageBlob });
+  };
+
+  const handleSendOTP = () => {
+    if (!values.email) {
+      setEmailError("Email is required");
+      return;
+    }
+    if (!values.name) {
+      setNameError("Name is required");
+      return;
+    }
+
+    axios
+      .post("http://localhost:3001/user/send-otp", {
+        email: values.email,
+        name: values.name,
+      })
+      .then((res) => {
+        setOtpSent(true);
+        console.log("OTP sent successfully");
+      })
+      .catch((err) => {
+        if (err.response && err.response.data && err.response.data.error) {
+          const errorMessage = err.response.data.error;
+          if (errorMessage.includes("Email")) {
+            setEmailError(errorMessage);
+          } else if (errorMessage.includes("User name")) {
+            setNameError(errorMessage);
+          } else {
+            // Handle other errors
+            console.error("Error:", errorMessage);
+          }
+        } else {
+          // Handle other types of errors
+          console.error("Unexpected error occurred:", err);
+        }
+      });
   };
 
   const navigate = useHistory();
@@ -54,6 +94,8 @@ function UserRegister() {
               setEmailError(errorMessage);
             } else if (errorMessage.includes("User name")) {
               setNameError(errorMessage);
+            } else if (errorMessage.includes("OTP")) {
+              setOTPError(errorMessage);
             } else {
               // Handle other errors
               console.error("Error:", errorMessage);
@@ -92,6 +134,11 @@ function UserRegister() {
   const handleEmailChange = (e) => {
     setValues({ ...values, email: e.target.value });
     setEmailError(""); // Reset email error when email changes
+  };
+
+  const handleOTPChange = (e) => {
+    setValues({ ...values, otp: e.target.value });
+    setOTPError(""); // Reset email error when email changes
   };
 
   const togglePasswordVisibility = () => {
@@ -233,6 +280,7 @@ function UserRegister() {
             <div className="errorContainer">
               {nameError && <p className="error">{nameError}</p>}
               {emailError && <p className="error">{emailError}</p>}
+              {otpError && <p className="error">{otpError}</p>}
               {isPasswordBlurred && passwordError && (
                 <p className="passwordError">{passwordError}</p>
               )}
@@ -241,7 +289,31 @@ function UserRegister() {
               onChange={handleImageChange}
               name="Profile photo"
             />
-            <button className="loginButton">Register</button>
+            <label htmlFor="otp" className="labels">
+              OTP :
+            </label>
+            {otpSent ? (
+              <>
+                <input
+                  onChange={handleOTPChange}
+                  type="text"
+                  id="otp"
+                  placeholder="Enter OTP"
+                  maxLength={6}
+                  required
+                  className="inputField"
+                ></input>
+                <button className="loginButton">Register</button>
+              </>
+            ) : (
+              <button
+                type="button"
+                className="loginButton"
+                onClick={handleSendOTP}
+              >
+                Send OTP
+              </button>
+            )}
           </form>
           <div className="orDiv">
             <p>or</p>

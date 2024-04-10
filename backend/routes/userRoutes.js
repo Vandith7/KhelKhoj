@@ -6,6 +6,8 @@ const multer = require('multer');
 const path = require('path');
 const db = require('../db');
 const moment = require('moment');
+const otpGenerator = require("otp-generator");
+const nodemailer = require("nodemailer");
 
 
 const salt = 10;
@@ -22,11 +24,201 @@ const storage = multer.diskStorage({
 
 // Initialize multer upload middleware
 const upload = multer({ storage: storage });
+const otpStore = {};
+const forgotPasswordOtpStore = {};
 
-// User Register Route
-router.post('/register', upload.single('profile_photo'), (req, res) => {
-    const { name, email, gender, city, password } = req.body;
+// Send OTP for forgot password via email
+const sendForgotPasswordOTPByEmail = (name, email, otp) => {
+    // Use your email sending configuration here
+    const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: "vandith.kadamba07@gmail.com",
+            pass: "obwj uhmj rfju vxnb",
+        },
+    });
+
+    const mailOptions = {
+        from: "vandith.kadamba07@gmail.com",
+        to: email,
+        subject: "Khel-Khoj Forgot Password OTP",
+        html: `<!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Khel-Khoj Forgot Password OTP</title>
+        </head>
+        <body style="font-family: Quicksand, sans-serif; background-color: #f4f4f4; padding: 20px;">
+        
+            <div style="background-color: #fff; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);">
+                <h1 style="color: #f19006; text-align: center;">Khel-Khoj</h1>
+                <h2 style=" text-align: center;">Forgot Password OTP</h2>
+                <h3 style="font-size: 16px;">Dear ${name},</h3>
+                <p style="font-size: 16px; margin-top: 20px;">Your OTP for resetting your Khel-Khoj user account password is: <strong>${otp}</strong></p>
+                <p style="font-size: 16px; margin-top: 20px;">Please use this OTP to reset your password.</p>
+                <p style="font-size: 16px; margin-top: 20px;">If you didn't request this OTP, please ignore this email.</p>
+                <p style="font-size: 16px; margin-top: 20px;">Thanks,<br/>The Khel-Khoj Team</p>
+            </div>
+        
+        </body>
+        </html>
+        `,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.log("Error sending email:", error);
+        } else {
+            console.log("Email sent:", info.response);
+        }
+    });
+};
+
+// Route for requesting OTP for forgot password
+router.post("/forgot-password", (req, res) => {
+    const { email } = req.body;
+
+    // Check if email exists in the database
+    const checkEmailQuery = "SELECT * FROM users WHERE email = ?";
+    db.query(checkEmailQuery, [email], (err, results) => {
+        if (err) {
+            return res.status(500).json({ error: "Error checking email existence" });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ error: "Email not found" });
+        }
+        const { name } = results[0];
+        // Generate OTP with only numbers
+        const otp = otpGenerator.generate(6, { upperCaseAlphabets: false, specialChars: false, lowerCaseAlphabets: false });
+        forgotPasswordOtpStore[email] = otp;
+        sendForgotPasswordOTPByEmail(name, email, otp);
+        res.json({ status: "OTP sent successfully" });
+    });
+});
+
+// Route for resetting password using OTP
+router.post("/reset-password", (req, res) => {
+    const { email, otp, password } = req.body;
+
+    // Check if newPassword field is provided in the request body
+    if (!password) {
+        return res.status(400).json({ error: "New password is required" });
+    }
+
+    if (!forgotPasswordOtpStore[email] || forgotPasswordOtpStore[email] !== otp) {
+        return res.status(400).json({ error: "Invalid OTP" });
+    }
+
+    // Clear OTP after successful verification
+    delete forgotPasswordOtpStore[email];
+
+    // Hash the new password
+    bcrypt.hash(password.toString(), salt, (hashErr, hash) => {
+        if (hashErr) {
+            return res.status(500).json({ error: "Error hashing password" });
+        }
+
+        // Update the password in the database
+        const updatePasswordQuery = "UPDATE users SET password = ? WHERE email = ?";
+        db.query(updatePasswordQuery, [hash, email], (updateErr, result) => {
+            if (updateErr) {
+                return res.status(500).json({ error: "Error updating password" });
+            }
+            res.json({ status: "Success" });
+        });
+    });
+});
+
+// Send OTP via email
+const sendOTPByEmail = (email, name, otp) => {
+    // Use your email sending configuration here
+    const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: "vandith.kadamba07@gmail.com",
+            pass: "obwj uhmj rfju vxnb",
+        },
+    });
+
+    const mailOptions = {
+        from: "vandith.kadamba07@gmail.com",
+        to: email,
+        subject: "Khel-Khoj OTP Verification",
+        html: `<!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Khel-Khoj OTP Verification</title>
+        </head>
+        <body style="font-family: Quicksand, sans-serif; background-color: #f4f4f4; padding: 20px;">
+        
+            <div style="background-color: #fff; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);">
+                <h1 style="color: #f19006; text-align: center;">Khel-Khoj</h1>
+                <h2 style=" text-align: center;">OTP Verification</h2>
+                <h3 style="font-size: 16px;">Dear ${name},</h3>
+                <p style="font-size: 16px;">Your OTP for user registration with Khel-Khoj is: <strong>${otp}</strong></p>
+                <p style="font-size: 16px; margin-top: 20px;">Please use this OTP to complete your registration process.</p>
+                <p style="font-size: 16px; margin-top: 20px;">If you didn't request this OTP, please ignore this email.</p>
+                <p style="font-size: 16px; margin-top: 20px;">Thanks,<br/>The Khel-Khoj Team</p>
+            </div>
+        
+        </body>
+        </html>
+        `,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.log("Error sending email:", error);
+        } else {
+            console.log("Email sent:", info.response);
+        }
+    });
+};
+
+router.post("/send-otp", (req, res) => {
+    const { name, email } = req.body;
+
+    // Check if email or name already exists in the database
+    const checkQuery = "SELECT * FROM users WHERE email = ? OR name = ?";
+    db.query(checkQuery, [email, name], (err, results) => {
+        if (err) {
+            return res.status(500).json({ error: "Error checking existence" });
+        }
+
+        for (let i = 0; i < results.length; i++) {
+            if (results[i].email === email) {
+                return res.status(400).json({ error: "Email already in use" });
+            }
+            if (results[i].name === name) {
+                return res.status(400).json({ error: "User name already in use" });
+            }
+        }
+
+        // Generate OTP with only numbers
+        const otp = otpGenerator.generate(6, { upperCaseAlphabets: false, specialChars: false, lowerCaseAlphabets: false });
+        otpStore[email] = otp;
+        sendOTPByEmail(email, name, otp);
+        res.json({ status: "OTP sent successfully" });
+    });
+});
+
+// Verify OTP and register user
+router.post("/register", upload.single('profile_photo'), (req, res) => {
+    const { name, email, gender, city, password, otp } = req.body;
     const profile_photo = req.body.profile_photo;
+
+    if (!otpStore[email] || otpStore[email] !== otp) {
+        return res.status(400).json({ error: "Invalid OTP" });
+    }
+
+
+    // Clear OTP after successful verification
+    delete otpStore[email];
+
 
     // Check if email already exists
     const emailCheckQuery = "SELECT * FROM users WHERE email = ?";

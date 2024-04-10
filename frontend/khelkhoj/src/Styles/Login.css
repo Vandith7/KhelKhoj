@@ -226,11 +226,6 @@ body {
   color: #000;
 }
 
-.notUserLink {
-  text-decoration: none;
-  color: #000;
-}
-
 .passwordInputContainer {
   position: relative;
   display: flex;
@@ -272,8 +267,45 @@ body {
   transition: all 0.5s ease;
   height: 30%;
   padding-bottom: 4%;
-  /* margin-right: px; */
 }
 .eyeIcon:hover {
   color: #f19006;
+}
+
+.forgotPassLink {
+  display: inline-block;
+  text-decoration: none;
+  cursor: pointer;
+  color: #f19006;
+  margin-top: 10px;
+  background-image: linear-gradient(#f19006 0 0);
+  background-position: 0 100%;
+  background-size: 0% 2px;
+  background-repeat: no-repeat;
+  transition: background-size 0.3s, background-position 0s 0.3s; /*change after the size immediately*/
+}
+
+.forgotPassLink:hover {
+  background-position: 100% 100%; /*OR bottom right*/
+  background-size: 100% 2px;
+}
+
+.notUserLink {
+  display: inline-block;
+  text-decoration: none;
+  color: #000;
+  background-image: linear-gradient(#000 0 0);
+  background-position: 0 100%;
+  background-size: 0% 2px;
+  background-repeat: no-repeat;
+  transition: background-size 0.3s, background-position 0s 0.3s;
+}
+
+.notUserLink:hover {
+  background-position: 100% 100%; /*OR bottom right*/
+  background-size: 100% 2px;
+}
+
+.resetForm {
+  margin-top: 30px;
 }

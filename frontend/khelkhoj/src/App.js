@@ -23,6 +23,10 @@ import Wallet from './Pages/Wallet';
 import ClubWallet from './Pages/ClubWallet';
 import UserStats from './Pages/UserStats';
 import ClubStats from './Pages/ClubStats';
+import UserPasswordReset from './Pages/UserPasswordReset';
+import ClubPasswordReset from './Pages/ClubPasswordReset';
+
+
 
 function App() {
   return (
@@ -53,6 +57,8 @@ function App() {
         <Route path="/clubWallet" component={ClubWallet} />
         <Route path="/userStats" component={UserStats} />
         <Route path="/clubStats" component={ClubStats} />
+        <Route path="/userPass" component={UserPasswordReset} />
+        <Route path="/clubPass" component={ClubPasswordReset} />
       </Switch>
 
     </Router>

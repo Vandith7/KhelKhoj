@@ -150,6 +150,9 @@ function UserLogin() {
             </div>
 
             <button className="loginButton">Log In</button>
+            <Link to="/userPass" className="forgotPassLink">
+              <>Forgot Password?</>
+            </Link>
           </form>
           <div className="orDiv">
             <p>or</p>
