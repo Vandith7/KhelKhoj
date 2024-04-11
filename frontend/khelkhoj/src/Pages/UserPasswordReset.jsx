@@ -94,7 +94,7 @@ function UserPasswordReset() {
               title: "Password reset successful!",
               confirmButtonText: "Home",
               confirmButtonColor: "#f19006",
-              text: `Your passord for ${values.email} has been changed successfully!`,
+              text: `Your password for ${values.email} has been changed successfully!`,
               icon: "success",
             }).then(() => {
               navigate.push("/userLogin");

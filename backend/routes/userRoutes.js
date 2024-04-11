@@ -75,6 +75,52 @@ const sendForgotPasswordOTPByEmail = (name, email, otp) => {
     });
 };
 
+const sendPasswordChangeSuccess = (name, email) => {
+    // Use your email sending configuration here
+    const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: "vandith.kadamba07@gmail.com",
+            pass: "obwj uhmj rfju vxnb",
+        },
+    });
+
+    const mailOptions = {
+        from: "vandith.kadamba07@gmail.com",
+        to: email,
+        subject: "Khel-Khoj User Account Password Change Successful",
+        html: `<!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Khel-Khoj Password Change Success</title>
+        </head>
+        <body style="font-family: Quicksand, sans-serif; background-color: #f4f4f4; padding: 20px;">
+        
+            <div style="background-color: #fff; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);">
+                <h1 style="color: #f19006; text-align: center;">Khel-Khoj</h1>
+                <h2 style=" text-align: center;">Password Change Successful</h2>
+                <h3 style="font-size: 16px;">Dear ${name},</h3>
+                <p style="font-size: 16px; margin-top: 20px;">Your Khel-Khoj user account password has been successfully changed.</p>
+                <p style="font-size: 16px; margin-top: 20px;">If you didn't initiate this change, please contact us immediately.</p>
+                <p style="font-size: 16px; margin-top: 20px;">Thanks,<br/>The Khel-Khoj Team</p>
+            </div>
+        
+        </body>
+        </html>
+        `,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.log("Error sending email:", error);
+        } else {
+            console.log("Email sent:", info.response);
+        }
+    });
+};
+
 // Route for requesting OTP for forgot password
 router.post("/forgot-password", (req, res) => {
     const { email } = req.body;
@@ -111,25 +157,38 @@ router.post("/reset-password", (req, res) => {
         return res.status(400).json({ error: "Invalid OTP" });
     }
 
-    // Clear OTP after successful verification
-    delete forgotPasswordOtpStore[email];
-
-    // Hash the new password
-    bcrypt.hash(password.toString(), salt, (hashErr, hash) => {
-        if (hashErr) {
-            return res.status(500).json({ error: "Error hashing password" });
+    // Fetch the user's name from the database
+    const getNameQuery = "SELECT name FROM users WHERE email = ?";
+    db.query(getNameQuery, [email], (nameErr, nameResult) => {
+        if (nameErr || nameResult.length === 0) {
+            return res.status(500).json({ error: "Error fetching user's name" });
         }
 
-        // Update the password in the database
-        const updatePasswordQuery = "UPDATE users SET password = ? WHERE email = ?";
-        db.query(updatePasswordQuery, [hash, email], (updateErr, result) => {
-            if (updateErr) {
-                return res.status(500).json({ error: "Error updating password" });
+        const name = nameResult[0].name;
+
+        // Clear OTP after successful verification
+        delete forgotPasswordOtpStore[email];
+
+        // Hash the new password
+        bcrypt.hash(password.toString(), salt, (hashErr, hash) => {
+            if (hashErr) {
+                return res.status(500).json({ error: "Error hashing password" });
             }
-            res.json({ status: "Success" });
+
+            // Update the password in the database
+            const updatePasswordQuery = "UPDATE users SET password = ? WHERE email = ?";
+            db.query(updatePasswordQuery, [hash, email], (updateErr, result) => {
+                if (updateErr) {
+                    return res.status(500).json({ error: "Error updating password" });
+                }
+                // Send password change success email
+                sendPasswordChangeSuccess(name, email);
+                res.json({ status: "Success" });
+            });
         });
     });
 });
+
 
 // Send OTP via email
 const sendOTPByEmail = (email, name, otp) => {
@@ -178,6 +237,53 @@ const sendOTPByEmail = (email, name, otp) => {
         }
     });
 };
+
+const sendRegistrationSuccessByEmail = (name, email) => {
+    // Use your email sending configuration here
+    const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: "vandith.kadamba07@gmail.com",
+            pass: "obwj uhmj rfju vxnb",
+        },
+    });
+
+    const mailOptions = {
+        from: "vandith.kadamba07@gmail.com",
+        to: email,
+        subject: "Khel-Khoj Registration Successful",
+        html: `<!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Khel-Khoj Registration Successful</title>
+        </head>
+        <body style="font-family: Quicksand, sans-serif; background-color: #f4f4f4; padding: 20px;">
+        
+            <div style="background-color: #fff; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);">
+                <h1 style="color: #f19006; text-align: center;">Khel-Khoj</h1>
+                <h2 style="text-align: center;">User Registration Successful</h2>
+                <h3 style="font-size: 16px;">Dear ${name},</h3>
+                <p style="font-size: 16px; margin-top: 20px;">Congratulations! You have successfully registered with Khel-Khoj.</p>
+                <p style="font-size: 16px; margin-top: 20px;">You can now explore our platform and enjoy our services.</p>
+                <p style="font-size: 16px; margin-top: 20px;">Thanks,<br/>The Khel-Khoj Team</p>
+            </div>
+        
+        </body>
+        </html>
+        `,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.log("Error sending email:", error);
+        } else {
+            console.log("Email sent:", info.response);
+        }
+    });
+};
+
 
 router.post("/send-otp", (req, res) => {
     const { name, email } = req.body;
@@ -251,6 +357,7 @@ router.post("/register", upload.single('profile_photo'), (req, res) => {
                     if (insertErr) {
                         return res.status(500).json({ error: "Error inserting data into database" });
                     }
+                    sendRegistrationSuccessByEmail(name, email)
                     return res.json({ status: "Success" });
                 });
             });

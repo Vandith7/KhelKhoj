@@ -6,6 +6,7 @@ import axios from "axios";
 import FileImageUploader from "../Components/FileImageUploader";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Swal from "sweetalert2";
 
 function UserRegister() {
   const [values, setValues] = useState({
@@ -84,7 +85,15 @@ function UserRegister() {
         .post("http://localhost:3001/user/register", values)
         .then((res) => {
           if (res.data.status === "Success") {
-            navigate.push("/userLogin");
+            Swal.fire({
+              title: "User registered!",
+              confirmButtonText: "Home",
+              confirmButtonColor: "#f19006",
+              text: `Congratulations ${values.name}! You have successfully registered with Khel-Khoj!`,
+              icon: "success",
+            }).then(() => {
+              navigate.push("/userLogin");
+            });
           }
         })
         .catch((err) => {
