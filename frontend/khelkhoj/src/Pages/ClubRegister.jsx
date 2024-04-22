@@ -32,8 +32,23 @@ function ClubRegister() {
   const handleImageChange = (imageBlob) => {
     setValues({ ...values, profile_photo: imageBlob });
   };
+
   const handleSendOTP = () => {
+    const validateEmail = (email) => {
+      const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return regex.test(email);
+    };
+
     if (!values.email) {
+      setEmailError("Email is required");
+      return;
+    }
+    if (!validateEmail(values.email)) {
+      setEmailError("Invalid email address");
+      return;
+    }
+    if (!values.name) {
+      setNameError("Name is required");
       return;
     }
 
@@ -133,7 +148,11 @@ function ClubRegister() {
   };
 
   const handleEmailChange = (e) => {
-    setValues({ ...values, email: e.target.value });
+    const emailValue = e.target.value;
+    setValues((prevValues) => ({
+      ...prevValues,
+      email: emailValue,
+    }));
     setEmailError(""); // Reset email error when email changes
   };
 
@@ -193,6 +212,7 @@ function ClubRegister() {
               autoFocus
               placeholder="Enter club name"
               required
+              disabled={otpSent}
               className="inputField"
             ></input>
             <label htmlFor="email" className="labels">
@@ -204,6 +224,7 @@ function ClubRegister() {
               id="email"
               placeholder="Enter email address"
               required
+              disabled={otpSent}
               className="inputField"
             ></input>
             <label htmlFor="password" className="labels">
@@ -299,6 +320,7 @@ function ClubRegister() {
                   id="otp"
                   placeholder="Enter OTP"
                   required
+                  maxLength={6}
                   className="inputField"
                 ></input>
                 <button className="loginButton">Register</button>
@@ -307,8 +329,7 @@ function ClubRegister() {
               <button
                 type="button"
                 className="loginButton"
-                onClick={handleSendOTP}
-                disabled={!values.email} // Disable button if email field is empty
+                onClick={handleSendOTP} // Disable button if email field is empty
               >
                 Send OTP
               </button>

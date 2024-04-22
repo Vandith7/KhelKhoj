@@ -34,12 +34,17 @@ function UserRegister() {
   };
 
   const handleSendOTP = () => {
+    const validateEmail = (email) => {
+      const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return regex.test(email);
+    };
+
     if (!values.email) {
       setEmailError("Email is required");
       return;
     }
-    if (!values.name) {
-      setNameError("Name is required");
+    if (!validateEmail(values.email)) {
+      setEmailError("Invalid email address");
       return;
     }
 
@@ -201,6 +206,7 @@ function UserRegister() {
               id="userName"
               placeholder="Enter username"
               required
+              disabled={otpSent}
               className="inputField"
             ></input>
 
@@ -213,6 +219,7 @@ function UserRegister() {
               id="email"
               placeholder="Enter email address"
               required
+              disabled={otpSent}
               className="inputField"
             ></input>
 

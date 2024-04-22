@@ -107,7 +107,7 @@ function ActivityModal(props) {
             Cancel
           </div>
           <div className="bookConButton" onClick={handleConfirmation}>
-            Confirm
+            Send
           </div>
         </div>
       </motion.div>

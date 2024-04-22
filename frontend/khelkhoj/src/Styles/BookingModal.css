@@ -125,3 +125,8 @@
 .confirmationError {
   width: 100%;
 }
+
+.confirm:hover {
+  background-color: #000;
+  color: #fcfaf8;
+}

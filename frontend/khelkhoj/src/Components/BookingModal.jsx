@@ -126,10 +126,28 @@ function BookingModal(props) {
           Please enter your password to confirm booking
         </h2>
         <p style={{ color: "#f00", marginTop: "-10px" }}>
-          Please note that you can cancel your booking up to 12 hours before the
-          scheduled time. However, cancellations made after this period will not
-          be accepted.
+          Please note that you can cancel your booking slot and receive a refund
+          according to the following policy based on the time prior to the slot:
         </p>
+        <ul style={{ listStyleType: "none", padding: "0", marginTop: "0" }}>
+          <li>
+            Cancelation 24 hours prior:{" "}
+            <span style={{ float: "right" }}>100% refund</span>
+          </li>
+          <li>
+            Cancelation 12 to 24 hours prior:{" "}
+            <span style={{ float: "right" }}>75% refund</span>
+          </li>
+          <li>
+            Cancelation 6 to 12 hours prior:{" "}
+            <span style={{ float: "right" }}>50% refund</span>
+          </li>
+          <li>
+            Cancelation within 6 hours:{" "}
+            <span style={{ float: "right" }}>25% refund</span>
+          </li>
+        </ul>
+
         <div className="passwordInputContainer">
           <input
             autoFocus
@@ -160,7 +178,7 @@ function BookingModal(props) {
           <div className="bookConButtonCan" onClick={props.onClose}>
             Cancel
           </div>
-          <div className="bookConButton" onClick={handleConfirmation}>
+          <div className="bookConButton confirm" onClick={handleConfirmation}>
             Confirm
           </div>
         </div>
