@@ -1,34 +1,33 @@
-
-.timeField{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
+.timeField {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
 }
 
-.timeContainer{
-    width: 100%;
-    display: flex;
-    flex-direction: column;
+.timeContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
-.daysContainer{
-    width: 40%;
-    display: grid;
-    font-family: 'Poppins',sans-serif;
-    grid-template-columns: repeat(2, 1fr); 
-    gap: 5px; 
-    margin-bottom: 2%;
+.daysContainer {
+  width: 40%;
+  display: grid;
+  font-family: "Poppins", sans-serif;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 5px;
+  margin-bottom: 2%;
 }
 
 .dayItem {
-    display: flex;
-    align-items: center;
-  }
+  display: flex;
+  align-items: center;
+}
 
-  .groundClubImageContainer{
-    display: grid;
-    grid-template-columns: repeat(3, 1fr); 
-    justify-content: center;
-    align-items: center;
-  }
+.groundClubImageContainer {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  justify-content: center;
+  align-items: center;
+}

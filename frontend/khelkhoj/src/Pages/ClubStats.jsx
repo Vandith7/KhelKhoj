@@ -3,8 +3,6 @@ import logo from "../assets/KhelKhojLogo.png";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import "../Styles/UserStats.css";
-import { faIndianRupeeSign } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 function ClubStats() {
   const [clubStats, setClubStats] = useState(null);

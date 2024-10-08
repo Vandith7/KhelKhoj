@@ -231,7 +231,7 @@ function UserRegister() {
               id="gender"
               className="inputField"
               required
-              style={{ width: "58%", color: "#9D7947" }}
+              style={{ width: "48%", color: "#9D7947" }}
             >
               <option value="male">Male</option>
               <option value="female">Female</option>

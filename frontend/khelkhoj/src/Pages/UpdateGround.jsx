@@ -125,6 +125,7 @@ function UpdateGround() {
                 </label>
                 <select
                   className="inputField"
+                  style={{ width: "46%" }}
                   id="startTime"
                   onChange={(e) =>
                     setValues({
@@ -144,6 +145,7 @@ function UpdateGround() {
                   End Time:
                 </label>
                 <select
+                  style={{ width: "46%" }}
                   className="inputField"
                   id="endTime"
                   onChange={(e) =>
